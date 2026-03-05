@@ -158,6 +158,5 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
-    document.getElementById("info").style.display = "none";
     document.getElementById("title").classList.add("hidden");
 });
