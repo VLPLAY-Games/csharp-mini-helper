@@ -82,7 +82,12 @@ function loadTopic(topic) {
         });
     }
 
-    hljs.highlightAll();
+    document.querySelectorAll('pre code').forEach((block) => {
+        const code = block.textContent;
+        const result = hljs.highlight('c#', code);
+        block.innerHTML = result.value;
+        block.classList.add('hljs');
+    });
 }
 
 // Поиск
