@@ -22,21 +22,32 @@ function renderMenu(list) {
 function loadTopic(topic) {
     const mainScreen = document.getElementById("mainScreen");
     const title = document.getElementById("title");
+    
+    // Показываем секции контента
+    const theorySection = document.getElementById("theorySection");
+    const examplesSection = document.getElementById("examplesSection");
+    const screensSection = document.getElementById("screensSection");
+    const info = document.getElementById("info");
 
-    // Анимация fade
-    [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), document.getElementById("info"), document.getElementById("screens")].forEach(el => {
-        el.classList.remove("fadeIn");
-        void el.offsetWidth; // trigger reflow
-        el.classList.add("fadeIn");
-    });
-
+    // Скрываем главный экран и показываем все секции
     mainScreen.classList.add("hidden");
     title.classList.remove("hidden");
+    theorySection.style.display = "block";
+    examplesSection.style.display = "block";
+    screensSection.style.display = "block";
+
+    // Анимация fade для всех элементов
+    [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), info, document.getElementById("screens")].forEach(el => {
+        if (el) {
+            el.classList.remove("fadeIn");
+            void el.offsetWidth; // trigger reflow
+            el.classList.add("fadeIn");
+        }
+    });
 
     document.getElementById("title").textContent = topic.title;
     document.getElementById("theory").innerHTML = topic.theory;
 
-    const info = document.getElementById("info");
     info.innerHTML = "";
     if (topic.important) info.innerHTML += `<div class="important">⚠ <b>Важно:</b> ${topic.important}</div>`;
     if (topic.error) info.innerHTML += `<div class="error">❌ <b>Ошибка:</b> ${topic.error}</div>`;
@@ -44,44 +55,51 @@ function loadTopic(topic) {
 
     const examples = document.getElementById("examples");
     examples.innerHTML = "";
-    topic.examples.forEach(ex => {
-        const block = document.createElement("div");
-        block.className = "exampleBlock";
+    if (topic.examples && topic.examples.length > 0) {
+        topic.examples.forEach(ex => {
+            const block = document.createElement("div");
+            block.className = "exampleBlock";
 
-        const h3 = document.createElement("h3");
-        h3.textContent = ex.name;
+            const h3 = document.createElement("h3");
+            h3.textContent = ex.name;
 
-        const pre = document.createElement("pre");
-        const code = document.createElement("code");
-        code.className = "language-csharp";
-        code.textContent = ex.code;
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.className = "language-csharp";
+            code.textContent = ex.code;
 
-        const btn = document.createElement("button");
-        btn.textContent = "Копировать код";
-        btn.onclick = () => {
-            navigator.clipboard.writeText(ex.code);
-            btn.classList.add("copied");
-            setTimeout(() => btn.classList.remove("copied"), 1000);
-        };
+            const btn = document.createElement("button");
+            btn.textContent = "Копировать код";
+            btn.onclick = () => {
+                navigator.clipboard.writeText(ex.code);
+                btn.classList.add("copied");
+                setTimeout(() => btn.classList.remove("copied"), 1000);
+            };
 
-        pre.appendChild(code);
-        block.appendChild(h3);
-        block.appendChild(pre);
-        block.appendChild(btn);
-        examples.appendChild(block);
-    });
+            pre.appendChild(code);
+            block.appendChild(h3);
+            block.appendChild(pre);
+            block.appendChild(btn);
+            examples.appendChild(block);
+        });
+    } else {
+        examplesSection.style.display = "none";
+    }
 
     const screens = document.getElementById("screens");
     screens.innerHTML = "";
-    if (topic.screens) {
+    if (topic.screens && topic.screens.length > 0) {
         topic.screens.forEach(img => {
             const image = document.createElement("img");
             image.src = img;
             image.className = "screen";
             screens.appendChild(image);
         });
+    } else {
+        screensSection.style.display = "none";
     }
 
+    // Подсветка синтаксиса
     document.querySelectorAll('pre code').forEach((block) => {
         const code = block.textContent;
         const result = hljs.highlight('c#', code);
@@ -133,4 +151,13 @@ window.addEventListener("resize", function() {
         document.getElementById("sidebar").classList.remove("show");
         document.getElementById("toggleMenu").innerHTML = "☰ Меню";
     }
+});
+
+// Инициализация - скрываем все секции кроме главного экрана
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("theorySection").style.display = "none";
+    document.getElementById("examplesSection").style.display = "none";
+    document.getElementById("screensSection").style.display = "none";
+    document.getElementById("info").style.display = "none";
+    document.getElementById("title").classList.add("hidden");
 });
