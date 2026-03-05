@@ -1,0 +1,265 @@
+body {
+    margin: 0;
+    font-family: Segoe UI, Arial;
+    background: #f5f6fb;
+}
+
+/* Layout */
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: #1e1e2f;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+}
+
+#toggleMenu {
+    display: none;
+    margin-bottom: 10px;
+    background: #34344e;
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Search */
+#search {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.15s ease, background 0.2s;
+}
+
+.sidebar li i {
+    margin-right: 8px;
+    color: #ccc;
+}
+.sidebar li:hover {
+    background: #34344e;
+    transform: scale(1.025);
+}
+
+button i {
+    margin-right: 6px;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Fade animation */
+.fadeIn {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+/* Code blocks */
+pre {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    white-space: pre;
+}
+
+code {
+    white-space: pre;
+    font-family: Consolas, monospace;
+}
+
+/* Buttons */
+button {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border: none;
+    background: #4a7cff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2f5fe0;
+}
+
+button.copied::after {
+    content: "✔";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00ff00;
+    font-weight: bold;
+    animation: fade 1s forwards;
+}
+
+@keyframes fade {
+    0% {opacity:1; transform: translateY(-50%) scale(1);}
+    50% {opacity:1; transform: translateY(-50%) scale(1.3);}
+    100% {opacity:0; transform: translateY(-50%) scale(1);}
+}
+
+/* Info blocks */
+.important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+.error { background: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
+.tip { background: #d1ecf1; padding: 10px; border-left: 4px solid #17a2b8; margin: 15px 0; }
+
+/* Example blocks */
+.exampleBlock { margin-bottom: 35px; }
+.exampleBlock h3 { margin-bottom: 10px; }
+
+/* Screenshots */
+.screen {
+    max-width: 100%;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    /* Уменьшенная фиксированная кнопка слева */
+    #toggleMenu {
+        display: block;
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #1e1e2f;
+        color: white;
+        border: none;
+        border-radius: 0 6px 6px 0;
+        padding: 8px 6px; /* Уменьшил отступы */
+        font-size: 16px; /* Уменьшил шрифт */
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        height: auto;
+        min-height: 80px; /* Уменьшил высоту */
+        width: 24px; /* Фиксированная ширина */
+        line-height: 1.2;
+        letter-spacing: 1px;
+        font-weight: normal;
+        transition: left 0.3s ease;
+    }
+    
+    /* Язычок меню (видимая часть когда закрыто) */
+    .sidebar:not(.show)::after {
+        content: "";
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60px;
+        background: #4a7cff;
+        border-radius: 0 4px 4px 0;
+        z-index: 999;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        pointer-events: none;
+        animation: pulse 2s infinite;
+    }
+    
+    /* Анимация пульсации язычка */
+    @keyframes pulse {
+        0% { opacity: 0.6; height: 60px; }
+        50% { opacity: 1; height: 70px; background: #6a9cff; }
+        100% { opacity: 0.6; height: 60px; }
+    }
+    
+    /* Когда меню открыто, язычок исчезает */
+    .sidebar.show::after {
+        display: none;
+    }
+    
+    /* Когда меню открыто, сдвигаем кнопку */
+    .sidebar.show ~ .content #toggleMenu,
+    #toggleMenu.menu-open {
+        left: 260px;
+    }
+    
+    /* Сайдбар */
+    .sidebar {
+        position: fixed;
+        left: -350px;
+        top: 0;
+        height: 100vh;
+        width: 260px;
+        z-index: 1001;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    /* Контент */
+    .content {
+        margin-left: 0;
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Адаптация для экранов */
+    pre {
+        font-size: 14px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .screen {
+        width: 100%;
+        height: auto;
+    }
+}
