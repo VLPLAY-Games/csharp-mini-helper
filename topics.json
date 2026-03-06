@@ -142,7 +142,7 @@
                 },
                 {
                     "name": "GroupBox с RadioButton",
-                    "code": "// RadioButton внутри GroupBox\n// позволяют выбрать только один вариант\n\nif(radioButton1.Checked)\n{\n    MessageBox.Show(\"Вы выбрали вариант 1\");\n}"
+                    "code": "// RadioButton внутри GroupBox позволяют выбрать только один вариант\n\nif(radioButton1.Checked)\n{\n    MessageBox.Show(\"Вы выбрали вариант 1\");\n}"
                 }
             ],
             "screens": []
