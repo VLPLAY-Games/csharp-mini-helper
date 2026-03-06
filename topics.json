@@ -54,7 +54,7 @@
             "examples": [
                 {
                     "name": "Цикл for",
-                    "code": "for(int i = 0; i < 5; i++)\n{\n    Console.WriteLine($\"for: {i}\");\n}"
+                    "code": "for(int i = 0; i < 5; i++)\n{\n    Console.WriteLine(i);\n}"
                 },
                 {
                     "name": "Циклы while и do while",
