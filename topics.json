@@ -58,7 +58,10 @@
                 },
                 {
                     "name": "Циклы while и do while",
-                    "code": "// while\nint j = 0;\nwhile(j < 5)\n{\n    Console.WriteLine($\"while: {j}\");\n    j++;\n}\n\n// do while\nint k = 0;\ndo\n{\n    Console.WriteLine($\"do while: {k}\");\n    k++;\n}\nwhile(k < 5);"
+                    "codes": [
+                        "// while\n\nint i = 0;\n\nwhile(i < 5)\n{\n    Console.WriteLine(i);\n    i++;\n}",
+                        "// do while\n\nint j = 0;\n\ndo\n{\n    Console.WriteLine(j);\n    j++;\n} while(j < 5);"
+                    ]
                 },
                 {
                     "name": "Random целое число",
