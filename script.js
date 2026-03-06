@@ -13,7 +13,7 @@ function renderMenu(list) {
 
     list.forEach((topic, index) => {
         const li = document.createElement("li");
-        li.textContent = `${index}. ${topic.title}`; // Нумерация
+        li.textContent = `${index}. ${topic.title}`;
         li.setAttribute("data-title", topic.title);
         li.onclick = () => loadTopic(topic);
         menu.appendChild(li);
@@ -61,6 +61,13 @@ function loadTopic(topic) {
             const h3 = document.createElement("h3");
             h3.textContent = ex.name;
             block.appendChild(h3);
+
+            if (ex.description) {
+                const descDiv = document.createElement("div");
+                descDiv.className = "example-description";
+                descDiv.innerHTML = ex.description;
+                block.appendChild(descDiv);
+            }
 
             if (ex.codes && Array.isArray(ex.codes)) {
                 const columnsDiv = document.createElement("div");
