@@ -40,15 +40,18 @@
                 },
                 {
                     "name": "Число → строка",
-                    "code": "int number = 10;\n\nstring text = number.ToString();\n\nConsole.WriteLine(text);"
-                }
+                    "codes": [
+                        "// int → string\n\nint number = 10;\n\nstring text = number.ToString();\n\nConsole.WriteLine(text);",
+                        "// double → string\n\ndouble pi = 3.14159;\n\nstring textDouble = pi.ToString();\n\nConsole.WriteLine(textDouble);"
+                    ]
+            }
             ],
             "screens": []
         },
         {
             "title": "Циклы и Random",
             "theory": "<p>Циклы позволяют выполнять код несколько раз.</p>",
-            "important": "Цикл for используется когда известно количество повторений.<br><b>while</b> проверяет условие перед выполнением, <b>do while</b> выполняет тело хотя бы один раз, а потом проверяет условие.",
+            "important": "Цикл <b>for</b> используется когда известно количество повторений.<br><br><b>while</b> проверяет условие перед выполнением, <b>do while</b> выполняет тело хотя бы один раз, а потом проверяет условие.<br><br><b>Random</b>: границы задаются как [левая граница, правая граница) — левая включительно, правая НЕ включительно.",
             "tip": "Random нужно создавать один раз, а не в каждом цикле.",
             "error": "Создание Random внутри цикла может давать одинаковые числа.",
             "examples": [
@@ -64,8 +67,12 @@
                     ]
                 },
                 {
-                    "name": "Random целое число",
-                    "code": "Random rnd = new Random();\n\nint number = rnd.Next(1, 10);\n\nConsole.WriteLine(number);"
+                    "name": "Random целое число (разные варианты)",
+                    "codes": [
+                        "// Рандом от 0 до 2147483647\n\nRandom r = new Random();\n\nint number = r.Next();\n\nConsole.WriteLine(number);",
+                        "// Рандом от 0 до 4\n\nRandom r = new Random();\n\nint number = r.Next(5);\n\nConsole.WriteLine(number);",
+                        "// Рандом от 1 до 9\n\nRandom r = new Random();\n\nint number = r.Next(1, 10);\n\nConsole.WriteLine(number);"
+                    ]
                 },
                 {
                     "name": "Random вещественное число",
