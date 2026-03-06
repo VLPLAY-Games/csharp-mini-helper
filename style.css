@@ -16,6 +16,8 @@ body {
     padding: 20px;
     overflow-y: auto;
     transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
@@ -39,12 +41,14 @@ body {
     margin-bottom: 15px;
     border: none;
     border-radius: 5px;
+    box-sizing: border-box;
 }
 
 .sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    flex: 1;
 }
 
 .sidebar li {
@@ -98,7 +102,7 @@ pre {
     border-radius: 8px;
     overflow: auto;
     white-space: pre;
-    margin-bottom: 15px; /* Отступ снизу */
+    margin-bottom: 15px;
 }
 
 code {
@@ -140,7 +144,7 @@ button:hover {
     flex: 1 1 250px;
     min-width: 0;
     display: flex;
-    flex-direction: column; /* Вертикальное расположение */
+    flex-direction: column;
 }
 
 .example-column pre {
@@ -163,6 +167,19 @@ button:hover {
     background: #254aa8;
     color: white;
     font-weight: bold;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+    border-top: 1px solid #34344e;
+}
+
+.sidebar-footer p {
+    margin: 5px 0;
 }
 
 @media (max-width: 768px) {
@@ -232,6 +249,7 @@ button:hover {
         z-index: 1001;
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        padding-bottom: 20px;
     }
 
     .sidebar.show {
@@ -258,5 +276,9 @@ button:hover {
 
     .example-columns {
         flex-direction: column;
+    }
+    
+    .sidebar-footer {
+        padding-bottom: 20px;
     }
 }
