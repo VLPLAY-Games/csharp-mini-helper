@@ -13,8 +13,8 @@ function renderMenu(list) {
 
     list.forEach((topic, index) => {
         const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${topic.title}`;
-        li.setAttribute("data-title", topic.title); // добавляем data-title для поиска и выделения
+        li.textContent = `${index}. ${topic.title}`; // Нумерация
+        li.setAttribute("data-title", topic.title);
         li.onclick = () => loadTopic(topic);
         menu.appendChild(li);
     });
@@ -24,24 +24,21 @@ function loadTopic(topic) {
     const mainScreen = document.getElementById("mainScreen");
     const title = document.getElementById("title");
 
-    // Показываем секции контента
     const theorySection = document.getElementById("theorySection");
     const examplesSection = document.getElementById("examplesSection");
     const screensSection = document.getElementById("screensSection");
     const info = document.getElementById("info");
 
-    // Скрываем главный экран и показываем все секции
     mainScreen.classList.add("hidden");
     title.classList.remove("hidden");
     theorySection.style.display = "block";
     examplesSection.style.display = "block";
     screensSection.style.display = "block";
 
-    // Анимация fade для всех элементов
     [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), info, document.getElementById("screens")].forEach(el => {
         if (el) {
             el.classList.remove("fadeIn");
-            void el.offsetWidth; // trigger reflow
+            void el.offsetWidth;
             el.classList.add("fadeIn");
         }
     });
@@ -63,24 +60,73 @@ function loadTopic(topic) {
 
             const h3 = document.createElement("h3");
             h3.textContent = ex.name;
-
-            const pre = document.createElement("pre");
-            const code = document.createElement("code");
-            code.className = "language-csharp";
-            code.textContent = ex.code;
-
-            const btn = document.createElement("button");
-            btn.textContent = "Копировать код";
-            btn.onclick = () => {
-                navigator.clipboard.writeText(ex.code);
-                btn.classList.add("copied");
-                setTimeout(() => btn.classList.remove("copied"), 1000);
-            };
-
-            pre.appendChild(code);
             block.appendChild(h3);
-            block.appendChild(pre);
-            block.appendChild(btn);
+
+            if (ex.codes && Array.isArray(ex.codes)) {
+                const columnsDiv = document.createElement("div");
+                columnsDiv.className = "example-columns";
+
+                ex.codes.forEach(codeText => {
+                    const colDiv = document.createElement("div");
+                    colDiv.className = "example-column";
+
+                    const pre = document.createElement("pre");
+                    const code = document.createElement("code");
+                    code.className = "language-csharp";
+                    code.textContent = codeText;
+                    pre.appendChild(code);
+
+                    const btn = document.createElement("button");
+                    btn.textContent = "Копировать код";
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(codeText).then(() => {
+                            const originalText = btn.textContent;
+                            const originalBg = btn.style.backgroundColor;
+                            btn.textContent = "Скопировано!";
+                            btn.style.backgroundColor = "#28a745";
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.style.backgroundColor = originalBg;
+                            }, 1000);
+                        }).catch(err => {
+                            console.error("Ошибка копирования:", err);
+                        });
+                    };
+
+                    colDiv.appendChild(pre);
+                    colDiv.appendChild(btn);
+                    columnsDiv.appendChild(colDiv);
+                });
+
+                block.appendChild(columnsDiv);
+            } else if (ex.code) {
+                const pre = document.createElement("pre");
+                const code = document.createElement("code");
+                code.className = "language-csharp";
+                code.textContent = ex.code;
+                pre.appendChild(code);
+
+                const btn = document.createElement("button");
+                btn.textContent = "Копировать код";
+                btn.onclick = () => {
+                    navigator.clipboard.writeText(ex.code).then(() => {
+                        const originalText = btn.textContent;
+                        const originalBg = btn.style.backgroundColor;
+                        btn.textContent = "Скопировано!";
+                        btn.style.backgroundColor = "#28a745";
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.backgroundColor = originalBg;
+                        }, 1000);
+                    }).catch(err => {
+                        console.error("Ошибка копирования:", err);
+                    });
+                };
+
+                block.appendChild(pre);
+                block.appendChild(btn);
+            }
+
             examples.appendChild(block);
         });
     } else {
@@ -100,7 +146,6 @@ function loadTopic(topic) {
         screensSection.style.display = "none";
     }
 
-    // Подсветка синтаксиса
     document.querySelectorAll('pre code').forEach((block) => {
         const code = block.textContent;
         const result = hljs.highlight('c#', code);
@@ -108,16 +153,12 @@ function loadTopic(topic) {
         block.classList.add('hljs');
     });
 
-    // --- Выделение активного пункта меню ---
-    // Убираем класс active у всех пунктов
     document.querySelectorAll("#menu li").forEach(li => li.classList.remove("active"));
-    // Находим пункт с data-title равным заголовку текущей темы и добавляем класс active
     const activeLi = document.querySelector(`#menu li[data-title="${topic.title}"]`);
     if (activeLi) {
         activeLi.classList.add("active");
     }
 
-    // --- Закрытие меню на мобильных устройствах после выбора темы ---
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         if (sidebar.classList.contains("show")) {
@@ -127,26 +168,24 @@ function loadTopic(topic) {
     }
 }
 
-// Поиск с фильтрацией (без перерисовки всего меню)
 document.getElementById("search").addEventListener("input", e => {
     const value = e.target.value.toLowerCase();
     const items = document.querySelectorAll("#menu li");
     items.forEach(li => {
         const title = li.dataset.title.toLowerCase();
         if (title.includes(value)) {
-            li.style.display = "flex"; // или "block" — как обычно отображаются пункты
+            li.style.display = "flex";
         } else {
             li.style.display = "none";
         }
     });
 });
 
-// Кнопка меню для мобильных
 document.getElementById("toggleMenu").addEventListener("click", function(e) {
     e.stopPropagation();
     const sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("show");
-    
+
     if (sidebar.classList.contains("show")) {
         this.innerHTML = "✕";
         this.style.minHeight = "60px";
@@ -156,7 +195,6 @@ document.getElementById("toggleMenu").addEventListener("click", function(e) {
     }
 });
 
-// Закрываем меню при клике на контент (на мобильных)
 document.querySelector(".content").addEventListener("click", function() {
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
@@ -169,15 +207,12 @@ document.querySelector(".content").addEventListener("click", function() {
     }
 });
 
-// При изменении размера окна сбрасываем состояние меню
 window.addEventListener("resize", function() {
     if (window.innerWidth > 768) {
         document.getElementById("sidebar").classList.remove("show");
-        // Текст кнопки на десктопе не важен, т.к. она скрыта через CSS
     }
 });
 
-// Инициализация - скрываем все секции кроме главного экрана
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";

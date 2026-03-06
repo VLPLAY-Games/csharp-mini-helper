@@ -1,6 +1,15 @@
 {
     "topics": [
         {
+            "title": "Visual Studio",
+            "theory": "<p>Visual Studio — среда разработки для C#. Здесь будут инструкции по установке, созданию проектов, компиляции и поиску .exe файлов.</p><p>Скриншоты и подробности появятся позже.</p>",
+            "important": "",
+            "tip": "",
+            "error": "",
+            "examples": [],
+            "screens": []
+        },
+        {
             "title": "Введение в C# и работа с консолью",
             "theory": "<p>C# — язык программирования от Microsoft.</p><p>Консольное приложение работает через текстовую консоль.</p><ul><li>Console.WriteLine()</li><li>Console.ReadLine()</li></ul>",
             "important": "Console.ReadLine() всегда возвращает строку.<br> Convert.ToInt32() безопаснее — он может обработать null.<br> Метод int.Parse() короче, но если строка не является числом, программа завершится с ошибкой.",
@@ -16,57 +25,50 @@
                     "code": "Console.WriteLine(\"Введите имя:\");\nstring name = Console.ReadLine();\n\nConsole.WriteLine(\"Привет \" + name);"
                 },
                 {
-                    "name": "Convert строка → int",
-                    "code": "Console.WriteLine(\"Введите число:\");\nstring text = Console.ReadLine();\n\nint number = Convert.ToInt32(text);\n\nConsole.WriteLine(number + 5);"
+                    "name": "Конвертация string → int (Convert и Parse)",
+                    "codes": [
+                        "// Способ 1: Convert.ToInt32()\n\nConsole.WriteLine(\"Введите целое число:\");\n\nstring text = Console.ReadLine();\nint number = Convert.ToInt32(text);\n\nConsole.WriteLine(number + 5);",
+                        "// Способ 2: int.Parse()\n\nConsole.WriteLine(\"Введите целое число:\");\n\nstring text = Console.ReadLine();\nint number = int.Parse(text);\n\nConsole.WriteLine(number + 5);"
+                    ]
                 },
                 {
-                    "name": "int.Parse строка → int",
-                    "code": "Console.WriteLine(\"Введите число:\");\nstring text = Console.ReadLine();\n\nint number = int.Parse(text);\n\nConsole.WriteLine(number + 5);"
+                    "name": "Конвертация string → double (Convert и Parse)",
+                    "codes": [
+                        "// Способ 1: Convert.ToDouble()\nConsole.WriteLine(\"Введите дробное число (с запятой):\");\nstring input = Console.ReadLine();\n\ndouble number1 = Convert.ToDouble(input);\n\nConsole.WriteLine($\"Convert: {number1 * 2}\");",
+                        "// Способ 2: double.Parse()\nConsole.WriteLine(\"Введите дробное число (с запятой):\");\nstring input = Console.ReadLine();\n\ndouble number2 = double.Parse(input);\n\nConsole.WriteLine($\"Parse: {number2 * 3}\");"
+                    ]
                 },
-
-                {
-                    "name": "Convert строка → double",
-                    "code": "Console.WriteLine(\"Введите число:\");\nstring text = Console.ReadLine();\n\ndouble number = Convert.ToDouble(text);\n\nConsole.WriteLine(number * 2);"
-                },
-
-                {
-                    "name": "double.Parse строка → double",
-                    "code": "Console.WriteLine(\"Введите число:\");\nstring text = Console.ReadLine();\n\ndouble number = double.Parse(text);\n\nConsole.WriteLine(number * 2);"
-                },
-
                 {
                     "name": "Число → строка",
                     "code": "int number = 10;\n\nstring text = number.ToString();\n\nConsole.WriteLine(text);"
                 }
             ],
-            "example": "<p>Программа спрашивает имя пользователя и выводит приветствие.</p>",
             "screens": []
         },
         {
             "title": "Циклы и Random",
             "theory": "<p>Циклы позволяют выполнять код несколько раз.</p>",
-            "important": "Цикл for используется когда известно количество повторений.",
+            "important": "Цикл for используется когда известно количество повторений.<br><b>while</b> проверяет условие перед выполнением, <b>do while</b> выполняет тело хотя бы один раз, а потом проверяет условие.",
             "tip": "Random нужно создавать один раз, а не в каждом цикле.",
             "error": "Создание Random внутри цикла может давать одинаковые числа.",
             "examples": [
                 {
                     "name": "Цикл for",
-                    "code": "for(int i = 0; i < 5; i++)\n{\n    Console.WriteLine(i);\n}"
+                    "code": "for(int i = 0; i < 5; i++)\n{\n    Console.WriteLine($\"for: {i}\");\n}"
                 },
                 {
-                    "name": "Цикл while",
-                    "code": "int i = 0;\n\nwhile(i < 5)\n{\n    Console.WriteLine(i);\n    i++;\n}"
+                    "name": "Циклы while и do while",
+                    "code": "// while\nint j = 0;\nwhile(j < 5)\n{\n    Console.WriteLine($\"while: {j}\");\n    j++;\n}\n\n// do while\nint k = 0;\ndo\n{\n    Console.WriteLine($\"do while: {k}\");\n    k++;\n}\nwhile(k < 5);"
                 },
                 {
                     "name": "Random целое число",
-                    "code": "Random rnd = new Random();\n\nint number = rnd.Next(1, 10);\nConsole.WriteLine(number);"
+                    "code": "Random rnd = new Random();\n\nint number = rnd.Next(1, 10);\n\nConsole.WriteLine(number);"
                 },
                 {
                     "name": "Random вещественное число",
-                    "code": "Random rnd = new Random();\n\ndouble number = rnd.NextDouble();\nConsole.WriteLine(number);"
+                    "code": "Random rnd = new Random();\n\ndouble number = rnd.NextDouble();\n\nConsole.WriteLine(number);"
                 }
             ],
-            "example": "<p>Можно вывести случайные числа в цикле.</p>",
             "screens": []
         },
         {
@@ -89,7 +91,6 @@
                     "code": "private void textBox1_TextChanged(object sender, EventArgs e)\n{\n    label1.Text = textBox1.Text;\n}"
                 }
             ],
-            "example": "<p>При нажатии кнопки выполняется код внутри события Click.</p>",
             "screens": []
         },
         {
@@ -108,7 +109,6 @@
                     "code": "button1.BackColor = Color.Red;"
                 }
             ],
-            "example": "<p>Кнопка может перемещаться по форме случайным образом.</p>",
             "screens": []
         },
         {
@@ -119,19 +119,18 @@
             "error": "Если RadioButton находятся прямо на форме без GroupBox, они будут считаться одной общей группой.",
             "examples": [
                 {
-                "name": "Проверка CheckBox",
-                "code": "private void checkBox1_CheckedChanged(object sender, EventArgs e)\n{\n    if(checkBox1.Checked)\n    {\n        label1.Text = \"Включено\";\n    }\n    else\n    {\n        label1.Text = \"Выключено\";\n    }\n}"
+                    "name": "Проверка CheckBox",
+                    "code": "private void checkBox1_CheckedChanged(object sender, EventArgs e)\n{\n    if(checkBox1.Checked)\n    {\n        label1.Text = \"Включено\";\n    }\n    else\n    {\n        label1.Text = \"Выключено\";\n    }\n}"
                 },
                 {
-                "name": "Проверка RadioButton",
-                "code": "private void button1_Click(object sender, EventArgs e)\n{\n    if(radioButton1.Checked)\n    {\n        label1.Text = \"Выбран первый вариант\";\n    }\n\n    if(radioButton2.Checked)\n    {\n        label1.Text = \"Выбран второй вариант\";\n    }\n}"
+                    "name": "Проверка RadioButton",
+                    "code": "private void button1_Click(object sender, EventArgs e)\n{\n    if(radioButton1.Checked)\n    {\n        label1.Text = \"Выбран первый вариант\";\n    }\n\n    if(radioButton2.Checked)\n    {\n        label1.Text = \"Выбран второй вариант\";\n    }\n}"
                 },
                 {
-                "name": "GroupBox с RadioButton",
-                "code": "// RadioButton внутри GroupBox\n// позволяют выбрать только один вариант\n\nif(radioButton1.Checked)\n{\n    MessageBox.Show(\"Вы выбрали вариант 1\");\n}"
+                    "name": "GroupBox с RadioButton",
+                    "code": "// RadioButton внутри GroupBox\n// позволяют выбрать только один вариант\n\nif(radioButton1.Checked)\n{\n    MessageBox.Show(\"Вы выбрали вариант 1\");\n}"
                 }
             ],
-            "example": "<p>Можно сделать форму с выбором цвета или режима программы с помощью RadioButton.</p>",
             "screens": []
         }
     ]

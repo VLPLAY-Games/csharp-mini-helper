@@ -4,13 +4,11 @@ body {
     background: #f5f6fb;
 }
 
-/* Layout */
 .layout {
     display: flex;
     height: 100vh;
 }
 
-/* Sidebar */
 .sidebar {
     width: 260px;
     background: #1e1e2f;
@@ -35,7 +33,6 @@ body {
     cursor: pointer;
 }
 
-/* Search */
 #search {
     width: 100%;
     padding: 8px;
@@ -72,7 +69,6 @@ button i {
     margin-right: 6px;
 }
 
-/* Content */
 .content {
     flex: 1;
     padding: 40px;
@@ -83,7 +79,6 @@ button i {
     display: none;
 }
 
-/* Fade animation */
 .fadeIn {
     animation: fadeIn 0.4s ease;
 }
@@ -97,13 +92,13 @@ button i {
     margin-bottom: 40px;
 }
 
-/* Code blocks */
 pre {
     background: #1e1e1e;
     padding: 20px;
     border-radius: 8px;
     overflow: auto;
     white-space: pre;
+    margin-bottom: 15px; /* Отступ снизу */
 }
 
 code {
@@ -111,9 +106,8 @@ code {
     font-family: Consolas, monospace;
 }
 
-/* Buttons */
 button {
-    margin-top: 10px;
+    margin-top: 0;
     padding: 10px 14px;
     border: none;
     background: #4a7cff;
@@ -129,33 +123,35 @@ button:hover {
     background: #2f5fe0;
 }
 
-button.copied::after {
-    content: "✔";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #00ff00;
-    font-weight: bold;
-    animation: fade 1s forwards;
-}
-
-@keyframes fade {
-    0% {opacity:1; transform: translateY(-50%) scale(1);}
-    50% {opacity:1; transform: translateY(-50%) scale(1.3);}
-    100% {opacity:0; transform: translateY(-50%) scale(1);}
-}
-
-/* Info blocks */
 .important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
 .error { background: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
 .tip { background: #d1ecf1; padding: 10px; border-left: 4px solid #17a2b8; margin: 15px 0; }
 
-/* Example blocks */
 .exampleBlock { margin-bottom: 35px; }
 .exampleBlock h3 { margin-bottom: 10px; }
 
-/* Screenshots */
+.example-columns {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.example-column {
+    flex: 1 1 250px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column; /* Вертикальное расположение */
+}
+
+.example-column pre {
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+.example-column button {
+    align-self: flex-start;
+}
+
 .screen {
     max-width: 100%;
     margin: 10px 0;
@@ -169,9 +165,7 @@ button.copied::after {
     font-weight: bold;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-    /* Уменьшенная фиксированная кнопка слева */
     #toggleMenu {
         display: block;
         position: fixed;
@@ -182,23 +176,22 @@ button.copied::after {
         color: white;
         border: none;
         border-radius: 0 6px 6px 0;
-        padding: 8px 6px; /* Уменьшил отступы */
-        font-size: 16px; /* Уменьшил шрифт */
+        padding: 8px 6px;
+        font-size: 16px;
         cursor: pointer;
         z-index: 1000;
         box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         writing-mode: vertical-rl;
         text-orientation: mixed;
         height: auto;
-        min-height: 80px; /* Уменьшил высоту */
-        width: 24px; /* Фиксированная ширина */
+        min-height: 80px;
+        width: 24px;
         line-height: 1.2;
         letter-spacing: 1px;
         font-weight: normal;
         transition: left 0.3s ease;
     }
-    
-    /* Язычок меню (видимая часть когда закрыто) */
+
     .sidebar:not(.show)::after {
         content: "";
         position: fixed;
@@ -214,26 +207,22 @@ button.copied::after {
         pointer-events: none;
         animation: pulse 2s infinite;
     }
-    
-    /* Анимация пульсации язычка */
+
     @keyframes pulse {
         0% { opacity: 0.6; height: 60px; }
         50% { opacity: 1; height: 70px; background: #6a9cff; }
         100% { opacity: 0.6; height: 60px; }
     }
-    
-    /* Когда меню открыто, язычок исчезает */
+
     .sidebar.show::after {
         display: none;
     }
-    
-    /* Когда меню открыто, сдвигаем кнопку */
+
     .sidebar.show ~ .content #toggleMenu,
     #toggleMenu.menu-open {
         left: 260px;
     }
-    
-    /* Сайдбар */
+
     .sidebar {
         position: fixed;
         left: -350px;
@@ -244,28 +233,30 @@ button.copied::after {
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0,0,0,0.3);
     }
-    
+
     .sidebar.show {
         left: 0;
     }
-    
-    /* Контент */
+
     .content {
         margin-left: 0;
         padding: 20px;
         width: 100%;
         box-sizing: border-box;
     }
-    
-    /* Адаптация для экранов */
+
     pre {
         font-size: 14px;
         white-space: pre-wrap;
         word-wrap: break-word;
     }
-    
+
     .screen {
         width: 100%;
         height: auto;
+    }
+
+    .example-columns {
+        flex-direction: column;
     }
 }
