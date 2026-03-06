@@ -34,8 +34,8 @@
                 {
                     "name": "Конвертация string → double (Convert и Parse)",
                     "codes": [
-                        "// Способ 1: Convert.ToDouble()\nConsole.WriteLine(\"Введите дробное число (с запятой):\");\nstring input = Console.ReadLine();\n\ndouble number1 = Convert.ToDouble(input);\n\nConsole.WriteLine($\"Convert: {number1 * 2}\");",
-                        "// Способ 2: double.Parse()\nConsole.WriteLine(\"Введите дробное число (с запятой):\");\nstring input = Console.ReadLine();\n\ndouble number2 = double.Parse(input);\n\nConsole.WriteLine($\"Parse: {number2 * 3}\");"
+                        "// Способ 1: Convert.ToDouble()\n\nConsole.WriteLine(\"Введите дробное число:\");\n\nstring text = Console.ReadLine();\ndouble number = Convert.ToDouble(text);\n\nConsole.WriteLine(number * 2);",
+                        "// Способ 2: double.Parse()\n\nConsole.WriteLine(\"Введите дробное число:\");\n\nstring text = Console.ReadLine();\ndouble number = double.Parse(text);\n\nConsole.WriteLine(number * 2);"
                     ]
                 },
                 {
