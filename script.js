@@ -14,6 +14,7 @@ function renderMenu(list) {
     list.forEach((topic, index) => {
         const li = document.createElement("li");
         li.textContent = `${index + 1}. ${topic.title}`;
+        li.setAttribute("data-title", topic.title); // добавляем data-title для поиска и выделения
         li.onclick = () => loadTopic(topic);
         menu.appendChild(li);
     });
@@ -22,7 +23,7 @@ function renderMenu(list) {
 function loadTopic(topic) {
     const mainScreen = document.getElementById("mainScreen");
     const title = document.getElementById("title");
-    
+
     // Показываем секции контента
     const theorySection = document.getElementById("theorySection");
     const examplesSection = document.getElementById("examplesSection");
@@ -106,13 +107,38 @@ function loadTopic(topic) {
         block.innerHTML = result.value;
         block.classList.add('hljs');
     });
+
+    // --- Выделение активного пункта меню ---
+    // Убираем класс active у всех пунктов
+    document.querySelectorAll("#menu li").forEach(li => li.classList.remove("active"));
+    // Находим пункт с data-title равным заголовку текущей темы и добавляем класс active
+    const activeLi = document.querySelector(`#menu li[data-title="${topic.title}"]`);
+    if (activeLi) {
+        activeLi.classList.add("active");
+    }
+
+    // --- Закрытие меню на мобильных устройствах после выбора темы ---
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar.classList.contains("show")) {
+            sidebar.classList.remove("show");
+            document.getElementById("toggleMenu").innerHTML = "☰";
+        }
+    }
 }
 
-// Поиск
+// Поиск с фильтрацией (без перерисовки всего меню)
 document.getElementById("search").addEventListener("input", e => {
     const value = e.target.value.toLowerCase();
-    const filtered = topics.filter(t => t.title.toLowerCase().includes(value));
-    renderMenu(filtered);
+    const items = document.querySelectorAll("#menu li");
+    items.forEach(li => {
+        const title = li.dataset.title.toLowerCase();
+        if (title.includes(value)) {
+            li.style.display = "flex"; // или "block" — как обычно отображаются пункты
+        } else {
+            li.style.display = "none";
+        }
+    });
 });
 
 // Кнопка меню для мобильных
@@ -121,12 +147,11 @@ document.getElementById("toggleMenu").addEventListener("click", function(e) {
     const sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("show");
     
-    // Меняем текст кнопки
     if (sidebar.classList.contains("show")) {
-        this.innerHTML = "✕"; // Только крестик
-        this.style.minHeight = "60px"; // Уменьшаем когда открыто
+        this.innerHTML = "✕";
+        this.style.minHeight = "60px";
     } else {
-        this.innerHTML = "☰"; // Только иконка меню
+        this.innerHTML = "☰";
         this.style.minHeight = "80px";
     }
 });
@@ -147,9 +172,8 @@ document.querySelector(".content").addEventListener("click", function() {
 // При изменении размера окна сбрасываем состояние меню
 window.addEventListener("resize", function() {
     if (window.innerWidth > 768) {
-        // На десктопе всегда показываем sidebar
         document.getElementById("sidebar").classList.remove("show");
-        document.getElementById("toggleMenu").innerHTML = "☰ Меню";
+        // Текст кнопки на десктопе не важен, т.к. она скрыта через CSS
     }
 });
 

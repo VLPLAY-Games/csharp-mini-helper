@@ -163,6 +163,12 @@ button.copied::after {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar li.active {
+    background: #254aa8;
+    color: white;
+    font-weight: bold;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     /* Уменьшенная фиксированная кнопка слева */
