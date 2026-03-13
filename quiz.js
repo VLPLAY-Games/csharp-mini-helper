@@ -18,7 +18,6 @@ fetch("quiz.json")
 document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         currentMode = e.target.value;
-        // Скрываем/показываем соответствующие контейнеры
         document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
         document.getElementById('quizControls').style.display = 'none';
@@ -27,7 +26,6 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
 
 // Начать тест
 document.getElementById("quizStartBtn").addEventListener("click", function() {
-    // Собираем выбранные темы
     const checkboxes = document.querySelectorAll('#quizTopicsList input[type="checkbox"]:checked');
     const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
 
@@ -45,7 +43,6 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
 // ------------------ Обычный режим (radio) ------------------
 function startRadioQuiz(selectedIndices) {
-    // Фильтруем вопросы по выбранным темам
     const questionsByTopic = {};
     selectedIndices.forEach(idx => {
         questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
@@ -66,12 +63,9 @@ function startRadioQuiz(selectedIndices) {
         return;
     }
 
-    // Перемешиваем вопросы
     selectedQuestions.sort(() => Math.random() - 0.5);
-
     renderRadioQuiz(selectedQuestions);
     document.getElementById("quizControls").style.display = "flex";
-    // Скрываем блок match, показываем radio
     document.getElementById('quizContainer').classList.remove('hidden');
     document.getElementById('matchContainer').classList.add('hidden');
 }
@@ -115,7 +109,7 @@ function renderRadioQuiz(questions) {
         container.appendChild(questionDiv);
     });
 
-    // Применить подсветку кода
+    // Подсветка синтаксиса
     document.querySelectorAll('#quizContainer code').forEach(block => {
         const code = block.textContent;
         const result = hljs.highlight('c#', code);
@@ -150,7 +144,6 @@ function checkRadioQuiz() {
             correctCount++;
         } else {
             qDiv.classList.add("incorrect");
-            // Подсветка вариантов
             const options = qDiv.querySelectorAll('.quiz-option');
             options.forEach((opt, optIdx) => {
                 opt.style.border = '';
@@ -183,7 +176,6 @@ function startMatchQuiz(selectedIndices) {
             alert("В выбранной теме нет вопросов.");
             return;
         }
-        // Перемешиваем и берём до 3
         const shuffled = [...topicQuestions].sort(() => Math.random() - 0.5);
         const chosen = shuffled.slice(0, Math.min(3, shuffled.length));
         selectedPairs = chosen.map(q => ({
@@ -220,18 +212,14 @@ function startMatchQuiz(selectedIndices) {
     const answers = selectedPairs.map(p => ({ answer: p.answer, aId: p.aId }));
     const shuffledAnswers = [...answers].sort(() => Math.random() - 0.5);
 
-    // Сохраняем пары для проверки
     matchPairs = selectedPairs;
 
-    // Отрисовываем блоки
     renderMatchQuiz(selectedPairs, shuffledAnswers);
 
-    // Показываем match контейнер, скрываем radio
     document.getElementById('quizContainer').classList.add('hidden');
     document.getElementById('matchContainer').classList.remove('hidden');
     document.getElementById("quizControls").style.display = "flex";
 
-    // Сброс состояния
     matchState = { selected: null, pairs: [] };
 }
 
@@ -241,7 +229,6 @@ function renderMatchQuiz(questions, answers) {
     leftCol.innerHTML = '';
     rightCol.innerHTML = '';
 
-    // Вопросы слева
     questions.forEach((q, idx) => {
         const block = document.createElement("div");
         block.className = "match-block";
@@ -253,7 +240,6 @@ function renderMatchQuiz(questions, answers) {
         leftCol.appendChild(block);
     });
 
-    // Ответы справа
     answers.forEach((a, idx) => {
         const block = document.createElement("div");
         block.className = "match-block";
@@ -265,70 +251,52 @@ function renderMatchQuiz(questions, answers) {
         rightCol.appendChild(block);
     });
 
-    // Обновляем canvas при изменении размеров
     setTimeout(drawMatchLines, 50);
     window.addEventListener('resize', drawMatchLines);
 }
 
 function onMatchBlockClick(e) {
     const block = e.currentTarget;
-    // Если блок уже сопоставлен, игнорируем
     if (block.classList.contains('matched')) return;
 
     const type = block.dataset.type;
     const id = block.dataset.id;
 
-    // Если ничего не выбрано
     if (matchState.selected === null) {
-        // Выбираем блок
         clearSelected();
         block.classList.add('selected');
         matchState.selected = { type, id, element: block };
         return;
     }
 
-    // Уже есть выбранный блок
     const selected = matchState.selected;
 
-    // Если кликнули на тот же самый блок
     if (selected.id === id) {
         clearSelected();
         matchState.selected = null;
         return;
     }
 
-    // Если типы разные (вопрос-ответ) — пробуем создать пару
     if (selected.type !== type) {
-        // Определяем, кто вопрос, кто ответ
         const questionBlock = selected.type === 'question' ? selected.element : block;
         const answerBlock = selected.type === 'answer' ? selected.element : block;
         const questionId = questionBlock.dataset.id;
         const answerId = answerBlock.dataset.id;
 
-        // Проверяем, правильная ли пара
         const pair = matchPairs.find(p => p.qId === questionId && p.aId === answerId);
         if (pair) {
-            // Правильно
-            // Добавляем в успешные пары
             matchState.pairs.push({ qId: questionId, aId: answerId });
-            // Помечаем блоки как matched
             questionBlock.classList.add('matched');
             answerBlock.classList.add('matched');
-            // Убираем выделение
             clearSelected();
             matchState.selected = null;
-            // Перерисовываем линии
             drawMatchLines();
         } else {
-            // Неправильно
-            // Рисуем красную линию на секунду
             drawTempLine(questionBlock, answerBlock, 'red');
-            // Убираем выделение
             clearSelected();
             matchState.selected = null;
         }
     } else {
-        // Однотипные — меняем выделение
         clearSelected();
         block.classList.add('selected');
         matchState.selected = { type, id, element: block };
@@ -369,7 +337,7 @@ function drawTempLine(blockA, blockB, color) {
     drawLineBetween(blockA, blockB, ctx, color, 3);
 
     setTimeout(() => {
-        drawMatchLines(); // восстанавливаем постоянные линии
+        drawMatchLines();
     }, 1000);
 }
 

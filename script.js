@@ -7,7 +7,6 @@ fetch("topics.json")
     .then(data => {
         topics = data.topics;
         renderMenu(topics, null);
-        // Создаём чекбоксы для выбора тем в тесте
         renderTopicCheckboxes();
     });
 
@@ -40,7 +39,6 @@ function renderMenu(list, activeTitle) {
         menu.appendChild(li);
     });
 
-    // Применить поиск после обновления меню
     filterMenu();
 }
 
@@ -49,27 +47,22 @@ function renderTopicMenu(topic) {
     const menu = document.getElementById("menu");
     menu.innerHTML = "";
 
-    // Пункт "Теория"
     addMenuItem(menu, "📘 Теория", "theory");
 
-    // Пункт "Важная информация" (если есть)
     if (topic.important || topic.error || topic.tip) {
         addMenuItem(menu, "⚠️ Важное", "info");
     }
 
-    // Пункты для каждого примера
     if (topic.examples && topic.examples.length > 0) {
         topic.examples.forEach((ex, idx) => {
             addMenuItem(menu, `📄 ${ex.name}`, `example-${idx}`);
         });
     }
 
-    // Пункт "Скриншоты" (если есть)
     if (topic.screens && topic.screens.length > 0) {
         addMenuItem(menu, "🖼️ Скриншоты", "screens");
     }
 
-    // Применить поиск после обновления меню
     filterMenu();
 }
 
@@ -82,7 +75,6 @@ function addMenuItem(menu, text, targetId) {
     li.onclick = (e) => {
         e.stopPropagation();
         scrollToElement(targetId);
-        // На мобильных устройствах закрываем сайдбар после выбора
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById("sidebar");
             if (sidebar.classList.contains("show")) {
@@ -125,7 +117,6 @@ function loadTopic(topic) {
     const screensSection = document.getElementById("screensSection");
     const info = document.getElementById("info");
 
-    // Скрываем тест, если он был открыт
     quizScreen.classList.add("hidden");
 
     mainScreen.classList.add("hidden");
@@ -261,7 +252,6 @@ function loadTopic(topic) {
         block.classList.add('hljs');
     });
 
-    // Показываем заголовок темы и кнопку "Назад"
     const currentTopicTitle = document.getElementById("currentTopicTitle");
     if (currentTopicTitle) {
         currentTopicTitle.textContent = topic.title;
@@ -269,7 +259,6 @@ function loadTopic(topic) {
     }
     document.getElementById("backToTopics").style.display = "block";
 
-    // Плавно переключаем меню на меню темы
     switchMenu(renderTopicMenu, topic);
 
     if (window.innerWidth <= 768) {
@@ -283,14 +272,12 @@ function loadTopic(topic) {
 
 // Возврат к главному меню
 function showMainMenu() {
-    // Скрываем заголовок темы и кнопку "Назад"
     const currentTopicTitle = document.getElementById("currentTopicTitle");
     if (currentTopicTitle) {
         currentTopicTitle.style.display = "none";
     }
     document.getElementById("backToTopics").style.display = "none";
 
-    // Плавно возвращаем главное меню
     switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
 }
 
@@ -339,7 +326,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("screensSection").style.display = "none";
     document.getElementById("title").classList.add("hidden");
     document.getElementById("backToTopics").style.display = "none";
-    // Скрываем заголовок темы при старте
     const currentTopicTitle = document.getElementById("currentTopicTitle");
     if (currentTopicTitle) {
         currentTopicTitle.style.display = "none";
@@ -348,20 +334,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Обработчик кнопки перехода к тесту
 document.getElementById("goToQuizBtn").addEventListener("click", function() {
-    // Скрываем главный экран и показываем экран теста
     document.getElementById("mainScreen").classList.add("hidden");
     document.getElementById("quizScreen").classList.remove("hidden");
-    // Скрываем заголовок темы и секции, если они были видны
     document.getElementById("title").classList.add("hidden");
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
-    // Также скрываем информацию о текущей теме в сайдбаре
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
-    // Возвращаем главное меню в сайдбар (если нужно)
     if (currentTopic) {
-        // Переключаем меню на общий список тем, но без выделения активной темы
         switchMenu(renderMenu, topics, null);
     }
 });
@@ -382,7 +363,7 @@ function renderTopicCheckboxes() {
 
         const label = document.createElement("label");
         label.htmlFor = `topic_${index}`;
-        label.textContent = `${index+1}. ${topic.title}`;
+        label.textContent = `${index}. ${topic.title}`;
 
         itemDiv.appendChild(checkbox);
         itemDiv.appendChild(label);

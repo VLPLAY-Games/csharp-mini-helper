@@ -21,23 +21,20 @@
             
             <div class="sidebar-footer">
                 <p>Разработано VLPLAY Games</p>
-                <p>Версия 0.7</p>
+                <p>Версия 0.8</p>
             </div>
         </div>
 
         <div class="content">
-            <!-- Главный экран приветствия -->
             <div id="mainScreen" class="fadeIn">
                 <h1>Добро пожаловать!</h1>
                 <p>Выберите тему слева или проверьте свои знания в тесте.</p>
-                <button id="goToQuizBtn" class="quiz-start-btn">📝 Пройти тест</button>
+                <button id="goToQuizBtn" class="quiz-start-btn">Пройти тест</button>
             </div>
 
-            <!-- Экран теста (скрыт по умолчанию) -->
             <div id="quizScreen" class="hidden fadeIn">
-                <h2>📋 Тест по C#</h2>
+                <h2>Тест по C#</h2>
                 
-                <!-- Выбор режима теста -->
                 <div class="quiz-mode-selector">
                     <label>
                         <input type="radio" name="quizMode" value="radio" checked> Обычный (выбор варианта)
@@ -47,7 +44,6 @@
                     </label>
                 </div>
 
-                <!-- Выбор тем -->
                 <div id="quizTopicSelector">
                     <p>Выберите темы для теста:</p>
                     <div id="quizTopicsList" class="quiz-topics-list"></div>
@@ -58,10 +54,8 @@
                     <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
                 </div>
 
-                <!-- Контейнер для обычного теста (radio) -->
                 <div id="quizContainer" class="quiz-container"></div>
 
-                <!-- Контейнер для блочного теста (match) -->
                 <div id="matchContainer" class="match-container hidden">
                     <div class="match-columns">
                         <div class="match-left" id="matchQuestions"></div>
@@ -70,7 +64,6 @@
                     <canvas id="matchCanvas"></canvas>
                 </div>
 
-                <!-- Кнопки управления -->
                 <div id="quizControls" class="quiz-controls" style="display: none;">
                     <button id="quizCheckBtn">Проверить ответы</button>
                     <button id="quizResetBtn">Сбросить</button>
