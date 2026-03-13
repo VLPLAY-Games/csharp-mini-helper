@@ -44,6 +44,22 @@ body {
     box-sizing: border-box;
 }
 
+#backButton {
+    width: 100%;
+    background: #34344e;
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+}
+
+#backButton:hover {
+    background: #4a4a6a;
+}
+
 .sidebar ul {
     list-style: none;
     padding: 0;

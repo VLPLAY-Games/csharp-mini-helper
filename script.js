@@ -1,13 +1,15 @@
 let topics = [];
+let currentTopic = null;
 
 fetch("topics.json")
     .then(r => r.json())
     .then(data => {
         topics = data.topics;
-        renderMenu(topics);
+        renderMenu(topics, null);
     });
 
-function renderMenu(list) {
+// Отображение главного меню (список тем)
+function renderMenu(list, activeTitle) {
     const menu = document.getElementById("menu");
     menu.innerHTML = "";
 
@@ -15,12 +17,84 @@ function renderMenu(list) {
         const li = document.createElement("li");
         li.textContent = `${index}. ${topic.title}`;
         li.setAttribute("data-title", topic.title);
+        if (activeTitle === topic.title) {
+            li.classList.add("active");
+        }
         li.onclick = () => loadTopic(topic);
         menu.appendChild(li);
     });
+
+    // Применить поиск после обновления меню
+    filterMenu();
 }
 
+// Отображение меню текущей темы (оглавление)
+function renderTopicMenu(topic) {
+    const menu = document.getElementById("menu");
+    menu.innerHTML = "";
+
+    addMenuItem(menu, "📘 Теория", "theory");
+
+    if (topic.important || topic.error || topic.tip) {
+        addMenuItem(menu, "⚠️ Важное", "info");
+    }
+
+    if (topic.examples && topic.examples.length > 0) {
+        topic.examples.forEach((ex, idx) => {
+            addMenuItem(menu, `📄 ${ex.name}`, `example-${idx}`);
+        });
+    }
+
+    if (topic.screens && topic.screens.length > 0) {
+        addMenuItem(menu, "🖼️ Скриншоты", "screens");
+    }
+
+    // Применить поиск после обновления меню
+    filterMenu();
+}
+
+// Вспомогательная функция для создания пункта меню темы
+function addMenuItem(menu, text, targetId) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    li.setAttribute("data-title", text);
+    li.setAttribute("data-target", targetId);
+    li.onclick = (e) => {
+        e.stopPropagation();
+        scrollToElement(targetId);
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar.classList.contains("show")) {
+                sidebar.classList.remove("show");
+                document.getElementById("toggleMenu").innerHTML = "☰";
+            }
+        }
+    };
+    menu.appendChild(li);
+}
+
+// Плавный скролл к элементу
+function scrollToElement(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}
+
+// Фильтрация меню по поиску
+function filterMenu() {
+    const searchValue = document.getElementById("search").value.toLowerCase();
+    const items = document.querySelectorAll("#menu li");
+    items.forEach(li => {
+        const title = li.dataset.title.toLowerCase();
+        li.style.display = title.includes(searchValue) ? "flex" : "none";
+    });
+}
+
+// Загрузка темы
 function loadTopic(topic) {
+    currentTopic = topic;
+
     const mainScreen = document.getElementById("mainScreen");
     const title = document.getElementById("title");
 
@@ -54,9 +128,10 @@ function loadTopic(topic) {
     const examples = document.getElementById("examples");
     examples.innerHTML = "";
     if (topic.examples && topic.examples.length > 0) {
-        topic.examples.forEach(ex => {
+        topic.examples.forEach((ex, idx) => {
             const block = document.createElement("div");
             block.className = "exampleBlock";
+            block.id = `example-${idx}`;
 
             const h3 = document.createElement("h3");
             h3.textContent = ex.name;
@@ -149,6 +224,7 @@ function loadTopic(topic) {
             image.className = "screen";
             screens.appendChild(image);
         });
+        screens.id = "screens";
     } else {
         screensSection.style.display = "none";
     }
@@ -160,11 +236,8 @@ function loadTopic(topic) {
         block.classList.add('hljs');
     });
 
-    document.querySelectorAll("#menu li").forEach(li => li.classList.remove("active"));
-    const activeLi = document.querySelector(`#menu li[data-title="${topic.title}"]`);
-    if (activeLi) {
-        activeLi.classList.add("active");
-    }
+    renderTopicMenu(topic);
+    document.getElementById("backToTopics").style.display = "block";
 
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
@@ -175,18 +248,12 @@ function loadTopic(topic) {
     }
 }
 
-document.getElementById("search").addEventListener("input", e => {
-    const value = e.target.value.toLowerCase();
-    const items = document.querySelectorAll("#menu li");
-    items.forEach(li => {
-        const title = li.dataset.title.toLowerCase();
-        if (title.includes(value)) {
-            li.style.display = "flex";
-        } else {
-            li.style.display = "none";
-        }
-    });
-});
+function showMainMenu() {
+    document.getElementById("backToTopics").style.display = "none";
+    renderMenu(topics, currentTopic ? currentTopic.title : null);
+}
+
+document.getElementById("search").addEventListener("input", filterMenu);
 
 document.getElementById("toggleMenu").addEventListener("click", function(e) {
     e.stopPropagation();
@@ -214,6 +281,10 @@ document.querySelector(".content").addEventListener("click", function() {
     }
 });
 
+document.getElementById("backButton").addEventListener("click", function() {
+    showMainMenu();
+});
+
 window.addEventListener("resize", function() {
     if (window.innerWidth > 768) {
         document.getElementById("sidebar").classList.remove("show");
@@ -225,4 +296,5 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
     document.getElementById("title").classList.add("hidden");
+    document.getElementById("backToTopics").style.display = "none";
 });
