@@ -1,0 +1,103 @@
+{
+    "questions": [
+        {
+            "topicIndex": 0,
+            "question": "Какой пункт нужно выбрать в Visual Studio для создания Windows Forms приложения?",
+            "options": [
+                "Консольное приложение",
+                "Приложение Windows Forms (.NET Framework)",
+                "Библиотека классов",
+                "Пустой проект"
+            ],
+            "correct": 1
+        },
+        {
+            "topicIndex": 0,
+            "question": "Где находится исполняемый файл (.exe) после компиляции?",
+            "options": [
+                "В папке проекта",
+                "В папке bin\\Debug или bin\\Release",
+                "В папке obj",
+                "На рабочем столе"
+            ],
+            "correct": 1
+        },
+        {
+            "topicIndex": 1,
+            "question": "Какой метод используется для вывода текста в консоль с переходом на новую строку?",
+            "options": [
+                "Console.Write()",
+                "Console.ReadLine()",
+                "Console.WriteLine()",
+                "Console.Print()"
+            ],
+            "correct": 2
+        },
+        {
+            "topicIndex": 1,
+            "question": "Как преобразовать строку в целое число с помощью Convert?",
+            "options": [
+                "int.Parse(string)",
+                "Convert.ToInt32(string)",
+                "(int)string",
+                "string.ToInt()"
+            ],
+            "correct": 1
+        },
+        {
+            "topicIndex": 2,
+            "question": "Какой цикл гарантированно выполнится хотя бы один раз?",
+            "options": [
+                "for",
+                "while",
+                "do while",
+                "foreach"
+            ],
+            "correct": 2
+        },
+        {
+            "topicIndex": 2,
+            "question": "Как получить случайное целое число от 1 до 5 (включительно)?",
+            "options": [
+                "r.Next(1, 6)",
+                "r.Next(1, 5)",
+                "r.Next(5)",
+                "r.NextDouble() * 5"
+            ],
+            "correct": 0
+        },
+        {
+            "topicIndex": 3,
+            "question": "Какое событие возникает при клике на кнопку?",
+            "options": [
+                "TextChanged",
+                "Click",
+                "Load",
+                "SelectedIndexChanged"
+            ],
+            "correct": 1
+        },
+        {
+            "topicIndex": 4,
+            "question": "Какое свойство задает позицию элемента на форме?",
+            "options": [
+                "Position",
+                "Coordinates",
+                "Location",
+                "Point"
+            ],
+            "correct": 2
+        },
+        {
+            "topicIndex": 5,
+            "question": "Какой элемент позволяет выбрать только один вариант из группы?",
+            "options": [
+                "CheckBox",
+                "RadioButton",
+                "GroupBox",
+                "ListBox"
+            ],
+            "correct": 1
+        }
+    ]
+}

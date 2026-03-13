@@ -7,6 +7,8 @@ fetch("topics.json")
     .then(data => {
         topics = data.topics;
         renderMenu(topics, null);
+        // Заполняем селекты выбора тем для теста после загрузки списка тем
+        if (typeof fillTopicSelects === 'function') fillTopicSelects();
     });
 
 // Универсальная функция для плавной смены содержимого меню
@@ -116,11 +118,15 @@ function loadTopic(topic) {
 
     const mainScreen = document.getElementById("mainScreen");
     const title = document.getElementById("title");
+    const quizScreen = document.getElementById("quizScreen");
 
     const theorySection = document.getElementById("theorySection");
     const examplesSection = document.getElementById("examplesSection");
     const screensSection = document.getElementById("screensSection");
     const info = document.getElementById("info");
+
+    // Скрываем тест, если он был открыт
+    quizScreen.classList.add("hidden");
 
     mainScreen.classList.add("hidden");
     title.classList.remove("hidden");
@@ -339,3 +345,48 @@ document.addEventListener("DOMContentLoaded", function() {
         currentTopicTitle.style.display = "none";
     }
 });
+
+// Обработчик кнопки перехода к тесту
+document.getElementById("goToQuizBtn").addEventListener("click", function() {
+    // Скрываем главный экран и показываем экран теста
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.remove("hidden");
+    // Скрываем заголовок темы и секции, если они были видны
+    document.getElementById("title").classList.add("hidden");
+    document.getElementById("theorySection").style.display = "none";
+    document.getElementById("examplesSection").style.display = "none";
+    document.getElementById("screensSection").style.display = "none";
+    // Также скрываем информацию о текущей теме в сайдбаре
+    document.getElementById("currentTopicTitle").style.display = "none";
+    document.getElementById("backToTopics").style.display = "none";
+    // Возвращаем главное меню в сайдбар (если нужно)
+    if (currentTopic) {
+        // Переключаем меню на общий список тем, но без выделения активной темы
+        switchMenu(renderMenu, topics, null);
+    }
+});
+
+// Функция для заполнения селектов тем (будет вызвана после загрузки topics)
+function fillTopicSelects() {
+    const startSelect = document.getElementById("quizTopicStart");
+    const endSelect = document.getElementById("quizTopicEnd");
+    if (!startSelect || !endSelect) return;
+    startSelect.innerHTML = '';
+    endSelect.innerHTML = '';
+    for (let i = 0; i < topics.length; i++) {
+        const optionStart = document.createElement('option');
+        optionStart.value = i;
+        optionStart.textContent = `${i+1}. ${topics[i].title}`;
+        startSelect.appendChild(optionStart);
+
+        const optionEnd = document.createElement('option');
+        optionEnd.value = i;
+        optionEnd.textContent = `${i+1}. ${topics[i].title}`;
+        endSelect.appendChild(optionEnd);
+    }
+    // По умолчанию выбираем диапазон 1-3
+    if (topics.length > 0) {
+        startSelect.selectedIndex = 0;
+        endSelect.selectedIndex = Math.min(2, topics.length-1);
+    }
+}
