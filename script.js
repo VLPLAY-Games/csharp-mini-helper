@@ -132,7 +132,6 @@ function updateBreadcrumbs(path) {
             if (index === 0) { // Главная
                 showMainScreen();
             }
-            // можно добавить другие уровни, но у нас только Главная / Тема или Главная / Тест
         });
     });
 }
@@ -344,6 +343,108 @@ function showMainMenu() {
     // Иначе ничего не делаем, меню уже список тем
 }
 
+// Генерация печатной версии (PDF)
+function generatePrintVersion() {
+    if (!topics || topics.length === 0) {
+        alert("Данные ещё не загружены. Попробуйте позже.");
+        return;
+    }
+
+    // Собираем HTML-контент
+    let contentHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>C# Краткий учебник - Полная версия</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; line-height: 1.5; }
+                h1 { color: #1e1e2f; border-bottom: 2px solid #4a7cff; padding-bottom: 10px; }
+                h2 { color: #2f5fe0; margin-top: 30px; }
+                h3 { color: #333; margin-top: 20px; }
+                pre { background: #1e1e1e; color: #fff; padding: 15px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
+                code { font-family: Consolas, monospace; }
+                .important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+                .error { background: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
+                .tip { background: #d1ecf1; padding: 10px; border-left: 4px solid #17a2b8; margin: 15px 0; }
+                .screen { max-width: 100%; margin: 10px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+                .exampleBlock { margin-bottom: 35px; }
+                .example-columns { display: flex; gap: 20px; flex-wrap: wrap; }
+                .example-column { flex: 1 1 250px; min-width: 0; }
+                @media print {
+                    body { margin: 0.5in; }
+                    pre { background: #f5f5f5; color: #000; border: 1px solid #ccc; }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>C# Краткий учебник - Полное руководство</h1>
+    `;
+
+    topics.forEach((topic, index) => {
+        contentHTML += `<h2>${index}. ${topic.title}</h2>`;
+
+        if (topic.theory) {
+            contentHTML += `<div>${topic.theory}</div>`;
+        }
+
+        if (topic.important || topic.error || topic.tip) {
+            if (topic.important) contentHTML += `<div class="important">⚠ <b>Важно:</b> ${topic.important}</div>`;
+            if (topic.error) contentHTML += `<div class="error">❌ <b>Ошибка:</b> ${topic.error}</div>`;
+            if (topic.tip) contentHTML += `<div class="tip">💡 <b>Совет:</b> ${topic.tip}</div>`;
+        }
+
+        if (topic.examples && topic.examples.length > 0) {
+            contentHTML += `<h3>Примеры</h3>`;
+            topic.examples.forEach((ex, idx) => {
+                contentHTML += `<div class="exampleBlock">`;
+                contentHTML += `<h4>${ex.name}</h4>`;
+                if (ex.description) contentHTML += `<div>${ex.description}</div>`;
+
+                if (ex.codes && Array.isArray(ex.codes)) {
+                    contentHTML += `<div class="example-columns">`;
+                    ex.codes.forEach(codeText => {
+                        contentHTML += `<div class="example-column"><pre><code>${escapeHtml(codeText)}</code></pre></div>`;
+                    });
+                    contentHTML += `</div>`;
+                } else if (ex.code) {
+                    contentHTML += `<pre><code>${escapeHtml(ex.code)}</code></pre>`;
+                }
+                contentHTML += `</div>`;
+            });
+        }
+
+        if (topic.screens && topic.screens.length > 0) {
+            contentHTML += `<h3>Скриншоты</h3>`;
+            topic.screens.forEach(img => {
+                contentHTML += `<img src="${img}" class="screen" alt="Скриншот">`;
+            });
+        }
+    });
+
+    contentHTML += `</body></html>`;
+
+    // Открываем новое окно и записываем HTML
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(contentHTML);
+    printWindow.document.close();
+
+    // Ждём загрузки ресурсов (изображения) и вызываем печать
+    printWindow.onload = function() {
+        printWindow.print();
+    };
+}
+
+// Вспомогательная функция для экранирования HTML (чтобы код отображался корректно)
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Обработчики событий
 document.getElementById("search").addEventListener("input", filterMenu);
 
@@ -393,7 +494,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (currentTopicTitle) {
         currentTopicTitle.style.display = "none";
     }
-    // Дополнительно скрываем info при загрузке
     document.getElementById("info").style.display = "none";
 });
 
@@ -405,17 +505,20 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
-    document.getElementById("info").style.display = "none";   // скрываем info в тесте
+    document.getElementById("info").style.display = "none";
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
     
-    // Если текущее меню — оглавление темы, переключаем на список тем
     if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, null);
     }
-    // Иначе ничего не делаем, меню уже список тем
     
     updateBreadcrumbs(['Главная', 'Тест']);
+});
+
+// Обработчик кнопки печатной версии
+document.getElementById("printVersionBtn").addEventListener("click", function() {
+    generatePrintVersion();
 });
 
 // Функция для создания чекбоксов тем

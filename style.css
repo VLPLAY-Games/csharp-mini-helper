@@ -160,6 +160,14 @@ button:hover {
     background: #2f5fe0;
 }
 
+/* Кнопка печатной версии */
+.print-btn {
+    background: #28a745;
+}
+.print-btn:hover {
+    background: #1e7e34;
+}
+
 .important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
 .error { background: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
 .tip { background: #d1ecf1; padding: 10px; border-left: 4px solid #17a2b8; margin: 15px 0; }
@@ -339,7 +347,7 @@ button:hover {
     }
 }
 
-/* ===== Стили для теста ===== */
+/* ===== Стили для теста (без изменений) ===== */
 .quiz-start-btn {
     background: #4a7cff;
     color: white;
@@ -502,7 +510,6 @@ button:hover {
     flex: 1;
 }
 
-/* Подсветка правильных/неправильных ответов */
 .quiz-option.correct-option {
     border: 2px solid #28a745;
     background-color: #d4edda;
@@ -541,7 +548,6 @@ button:hover {
     background: #5a6268;
 }
 
-/* Блок результата теста */
 .quiz-result {
     margin-top: 30px;
     padding: 20px;
