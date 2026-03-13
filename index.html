@@ -35,15 +35,17 @@
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button id="goToQuizBtn" class="quiz-start-btn">Пройти тест</button>
                     <div class="print-btn-div">
-                        <p>Хотите сохранить материалы? Создайте печатную версию выбранных тем или сохранить в .pdf</p>
-                        <button id="printVersionBtn" class="print-btn">Печатная версия</button>
+                        <p>Хотите сохранить материалы? Создайте печатную версию выбранных тем или сохраните в PDF.</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="printVersionBtn" class="print-btn">Печатная версия</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div id="printPanel" class="print-panel hidden">
                 <div class="print-panel-header">
-                    <h3>Выберите темы для печати</h3>
+                    <h3>Выберите темы для печати / PDF</h3>
                     <button id="closePrintPanel" class="close-btn">✕</button>
                 </div>
                 <div id="printTopicsList" class="print-topics-list"></div>
@@ -52,6 +54,9 @@
                     <button id="printDeselectAllBtn">Сбросить все</button>
                     <button id="generatePrintBtn" class="generate-print-btn">Создать PDF</button>
                 </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    <em>Для сохранения в PDF выберите в диалоге печати пункт «Сохранить как PDF».</em>
+                </p>
             </div>
 
             <div id="quizScreen" class="hidden fadeIn">
