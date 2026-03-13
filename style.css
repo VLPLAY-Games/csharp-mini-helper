@@ -680,6 +680,15 @@ button:hover {
     max-height: 80vh;
     overflow-y: auto;
     border: 1px solid #ddd;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+.print-panel.hidden {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .print-panel-header {
