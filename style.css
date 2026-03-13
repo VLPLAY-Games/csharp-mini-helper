@@ -594,3 +594,18 @@ button:hover {
         gap: 20px;
     }
 }
+
+.settings-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #4a7cff;
+    transition: transform 0.2s;
+}
+.settings-btn:hover {
+    transform: rotate(30deg);
+    background: transparent;
+    color: #2f5fe0;
+}

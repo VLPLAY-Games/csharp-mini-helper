@@ -24,6 +24,14 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
     });
 });
 
+// Кнопка сворачивания/разворачивания настроек теста
+document.getElementById('toggleQuizSettingsBtn').addEventListener('click', function() {
+    const settings = document.getElementById('quizTopicSelector');
+    const testArea = document.getElementById('quizTestArea');
+    settings.classList.toggle('hidden');
+    testArea.classList.toggle('hidden');
+});
+
 // Начать тест
 document.getElementById("quizStartBtn").addEventListener("click", function() {
     const checkboxes = document.querySelectorAll('#quizTopicsList input[type="checkbox"]:checked');
@@ -43,6 +51,20 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
 // ------------------ Обычный режим (radio) ------------------
 function startRadioQuiz(selectedIndices) {
+    // Скрываем настройки, показываем область теста
+    document.getElementById('quizTopicSelector').classList.add('hidden');
+    document.getElementById('quizTestArea').classList.remove('hidden');
+
+    // Очищаем данные блочного режима, чтобы не мешали
+    document.getElementById('matchQuestions').innerHTML = '';
+    document.getElementById('matchAnswers').innerHTML = '';
+    matchPairs = [];
+    matchState = { selected: null, pairs: [] };
+    const canvas = document.getElementById('matchCanvas');
+    if (canvas) {
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }
+
     const questionsByTopic = {};
     selectedIndices.forEach(idx => {
         questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
@@ -161,6 +183,14 @@ function checkRadioQuiz() {
 
 // ------------------ Блочный режим (match) ------------------
 function startMatchQuiz(selectedIndices) {
+    // Скрываем настройки, показываем область теста
+    document.getElementById('quizTopicSelector').classList.add('hidden');
+    document.getElementById('quizTestArea').classList.remove('hidden');
+
+    // Очищаем данные радио-режима
+    document.getElementById("quizContainer").innerHTML = "";
+    currentQuestions = [];
+
     const questionsByTopic = {};
     selectedIndices.forEach(idx => {
         questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);

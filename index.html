@@ -33,7 +33,10 @@
             </div>
 
             <div id="quizScreen" class="hidden fadeIn">
-                <h2>Тест по C#</h2>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2>Тест по C#</h2>
+                    <button id="toggleQuizSettingsBtn" class="settings-btn" title="Настройки теста">⚙️</button>
+                </div>
                 
                 <div class="quiz-mode-selector">
                     <label>
@@ -54,19 +57,21 @@
                     <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
                 </div>
 
-                <div id="quizContainer" class="quiz-container"></div>
+                <div id="quizTestArea" class="hidden">
+                    <div id="quizContainer" class="quiz-container"></div>
 
-                <div id="matchContainer" class="match-container hidden">
-                    <div class="match-columns">
-                        <div class="match-left" id="matchQuestions"></div>
-                        <div class="match-right" id="matchAnswers"></div>
+                    <div id="matchContainer" class="match-container hidden">
+                        <div class="match-columns">
+                            <div class="match-left" id="matchQuestions"></div>
+                            <div class="match-right" id="matchAnswers"></div>
+                        </div>
+                        <canvas id="matchCanvas"></canvas>
                     </div>
-                    <canvas id="matchCanvas"></canvas>
-                </div>
 
-                <div id="quizControls" class="quiz-controls" style="display: none;">
-                    <button id="quizCheckBtn">Проверить ответы</button>
-                    <button id="quizResetBtn">Сбросить</button>
+                    <div id="quizControls" class="quiz-controls" style="display: none;">
+                        <button id="quizCheckBtn">Проверить ответы</button>
+                        <button id="quizResetBtn">Сбросить</button>
+                    </div>
                 </div>
             </div>
 
