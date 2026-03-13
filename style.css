@@ -547,6 +547,7 @@ button:hover {
     padding: 20px;
     border-radius: 12px;
     border: 1px solid #e0e4f0;
+    justify-content: center; /* Центрирование блоков по вертикали */
 }
 .match-block {
     background: white;
@@ -595,6 +596,7 @@ button:hover {
     }
 }
 
+/* Кнопка настроек теста */
 .settings-btn {
     background: transparent;
     border: none;
