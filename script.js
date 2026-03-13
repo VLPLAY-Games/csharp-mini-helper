@@ -2,7 +2,7 @@ let topics = [];
 let currentTopic = null;
 let isMenuAnimating = false;
 
-fetch("topics.json")
+fetch("db/topics.json")
     .then(r => r.json())
     .then(data => {
         topics = data.topics;

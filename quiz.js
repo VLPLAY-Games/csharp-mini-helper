@@ -8,7 +8,7 @@ let matchState = {
 };
 
 // Загружаем вопросы при старте
-fetch("quiz.json")
+fetch("db/quiz.json")
     .then(r => r.json())
     .then(data => {
         quizData = data.questions;
