@@ -8,6 +8,7 @@ fetch("db/topics.json")
         topics = data.topics;
         renderMenu(topics, null);
         renderTopicCheckboxes();
+        updateBreadcrumbs(['Главная']); // начальное состояние
     });
 
 // Универсальная функция для плавной смены содержимого меню
@@ -102,6 +103,51 @@ function filterMenu() {
         const title = li.dataset.title.toLowerCase();
         li.style.display = title.includes(searchValue) ? "flex" : "none";
     });
+}
+
+// Обновление хлебных крошек
+function updateBreadcrumbs(path) {
+    const container = document.getElementById("breadcrumbs");
+    if (!container) return;
+    let html = '';
+    for (let i = 0; i < path.length; i++) {
+        const item = path[i];
+        if (i === path.length - 1) {
+            html += `<span class="current">${item}</span>`;
+        } else {
+            html += `<a href="#" data-index="${i}">${item}</a>`;
+            html += `<span class="separator">/</span>`;
+        }
+    }
+    container.innerHTML = html;
+
+    // Обработка кликов на ссылки хлебных крошек (кроме последнего)
+    container.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const index = parseInt(e.target.dataset.index, 10);
+            if (index === 0) { // Главная
+                showMainScreen();
+            }
+            // можно добавить другие уровни, но у нас только Главная / Тема или Главная / Тест
+        });
+    });
+}
+
+// Показать главный экран
+function showMainScreen() {
+    document.getElementById("mainScreen").classList.remove("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("title").classList.add("hidden");
+    document.getElementById("theorySection").style.display = "none";
+    document.getElementById("examplesSection").style.display = "none";
+    document.getElementById("screensSection").style.display = "none";
+    document.getElementById("currentTopicTitle").style.display = "none";
+    document.getElementById("backToTopics").style.display = "none";
+    if (currentTopic) {
+        switchMenu(renderMenu, topics, null);
+    }
+    updateBreadcrumbs(['Главная']);
 }
 
 // Загрузка темы
@@ -268,6 +314,8 @@ function loadTopic(topic) {
             document.getElementById("toggleMenu").innerHTML = "☰";
         }
     }
+
+    updateBreadcrumbs(['Главная', topic.title]);
 }
 
 // Возврат к главному меню
@@ -279,6 +327,10 @@ function showMainMenu() {
     document.getElementById("backToTopics").style.display = "none";
 
     switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
+
+    // Оставляем экран темы видимым? нет, мы возвращаемся на главную
+    // но основной контент остаётся с темой? нужно скрыть тему и показать главный экран
+    showMainScreen();
 }
 
 // Обработчики событий
@@ -345,6 +397,7 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     if (currentTopic) {
         switchMenu(renderMenu, topics, null);
     }
+    updateBreadcrumbs(['Главная', 'Тест']);
 });
 
 // Функция для создания чекбоксов тем

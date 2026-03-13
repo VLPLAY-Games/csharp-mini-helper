@@ -215,6 +215,29 @@ button:hover {
     margin: 5px 0;
 }
 
+/* Хлебные крошки */
+.breadcrumbs {
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #666;
+}
+.breadcrumbs a {
+    color: #4a7cff;
+    text-decoration: none;
+    cursor: pointer;
+}
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+.breadcrumbs .separator {
+    margin: 0 6px;
+    color: #999;
+}
+.breadcrumbs .current {
+    color: #333;
+    font-weight: 500;
+}
+
 @media (max-width: 768px) {
     #toggleMenu {
         display: block;
@@ -316,7 +339,7 @@ button:hover {
     }
 }
 
-/* ===== Стили для теста (обновлённый блок выбора тем) ===== */
+/* ===== Стили для теста ===== */
 .quiz-start-btn {
     background: #4a7cff;
     color: white;
@@ -346,7 +369,6 @@ button:hover {
     border-radius: 8px;
 }
 
-/* Сетка для списка тем */
 .quiz-topics-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -403,14 +425,12 @@ button:hover {
     background: #5a6268;
 }
 
-/* Адаптация для мобильных: одна колонка */
 @media (max-width: 768px) {
     .quiz-topics-list {
         grid-template-columns: 1fr;
     }
 }
 
-/* Остальные стили теста (без изменений) */
 .quiz-container {
     display: flex;
     flex-direction: column;
@@ -482,6 +502,16 @@ button:hover {
     flex: 1;
 }
 
+/* Подсветка правильных/неправильных ответов */
+.quiz-option.correct-option {
+    border: 2px solid #28a745;
+    background-color: #d4edda;
+}
+.quiz-option.incorrect-option {
+    border: 2px solid #dc3545;
+    background-color: #f8d7da;
+}
+
 .quiz-controls {
     display: flex;
     gap: 15px;
@@ -511,7 +541,6 @@ button:hover {
     background: #5a6268;
 }
 
-/* Переключатель режимов теста */
 .quiz-mode-selector {
     display: flex;
     gap: 20px;
@@ -527,7 +556,6 @@ button:hover {
     cursor: pointer;
 }
 
-/* Стили для блочного теста */
 .match-container {
     position: relative;
     min-height: 400px;
@@ -547,7 +575,7 @@ button:hover {
     padding: 20px;
     border-radius: 12px;
     border: 1px solid #e0e4f0;
-    justify-content: center; /* Центрирование блоков по вертикали */
+    justify-content: center;
 }
 .match-block {
     background: white;
@@ -588,7 +616,6 @@ button:hover {
     pointer-events: none;
     z-index: 10;
 }
-/* Адаптация для мобильных */
 @media (max-width: 768px) {
     .match-columns {
         flex-direction: column;
@@ -596,7 +623,6 @@ button:hover {
     }
 }
 
-/* Кнопка настроек теста */
 .settings-btn {
     background: transparent;
     border: none;

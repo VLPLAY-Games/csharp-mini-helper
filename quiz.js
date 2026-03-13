@@ -21,7 +21,6 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
         currentMode = e.target.value;
         document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
-        // Скрываем кнопку "Проверить" в блочном режиме
         document.getElementById('quizCheckBtn').style.display = currentMode === 'radio' ? 'inline-block' : 'none';
     });
 });
@@ -87,6 +86,24 @@ function startRadioQuiz(selectedIndices) {
     document.getElementById('matchContainer').classList.add('hidden');
 }
 
+// Подсветка конкретного вопроса (для radio)
+function highlightQuestion(questionDiv, selectedValue, correctValue) {
+    const options = questionDiv.querySelectorAll('.quiz-option');
+    // Сброс классов подсветки
+    options.forEach(opt => {
+        opt.classList.remove('correct-option', 'incorrect-option');
+    });
+    if (selectedValue !== undefined) {
+        const selectedOption = options[selectedValue];
+        if (selectedValue === correctValue) {
+            selectedOption.classList.add('correct-option');
+        } else {
+            selectedOption.classList.add('incorrect-option');
+            options[correctValue].classList.add('correct-option');
+        }
+    }
+}
+
 function renderRadioQuiz(questions) {
     const container = document.getElementById("quizContainer");
     container.innerHTML = "";
@@ -120,6 +137,15 @@ function renderRadioQuiz(questions) {
             optionLabel.appendChild(radio);
             optionLabel.appendChild(codeSpan);
             optionsDiv.appendChild(optionLabel);
+
+            // Добавляем обработчик для мгновенной проверки
+            radio.addEventListener('change', function(e) {
+                const questionDiv = this.closest('.quiz-question');
+                const questionIndex = questionDiv.dataset.questionIndex;
+                const currentQ = currentQuestions[questionIndex];
+                const selectedValue = parseInt(this.value, 10);
+                highlightQuestion(questionDiv, selectedValue, currentQ.correct);
+            });
         });
 
         questionDiv.appendChild(optionsDiv);
@@ -149,26 +175,18 @@ function checkRadioQuiz() {
 
     questions.forEach((qDiv, idx) => {
         const selectedRadio = qDiv.querySelector('input[type="radio"]:checked');
-        if (!selectedRadio) return;
+        const currentQ = currentQuestions[idx];
+        const correctValue = currentQ.correct;
 
-        const selectedValue = parseInt(selectedRadio.value, 10);
-        const correctValue = currentQuestions[idx].correct;
-
-        qDiv.classList.remove("correct", "incorrect");
-        if (selectedValue === correctValue) {
-            qDiv.classList.add("correct");
-            correctCount++;
+        if (selectedRadio) {
+            const selectedValue = parseInt(selectedRadio.value, 10);
+            highlightQuestion(qDiv, selectedValue, correctValue);
+            if (selectedValue === correctValue) {
+                correctCount++;
+            }
         } else {
-            qDiv.classList.add("incorrect");
-            const options = qDiv.querySelectorAll('.quiz-option');
-            options.forEach((opt, optIdx) => {
-                opt.style.border = '';
-                if (optIdx === correctValue) {
-                    opt.style.border = '2px solid #28a745';
-                } else if (optIdx === selectedValue) {
-                    opt.style.border = '2px solid #dc3545';
-                }
-            });
+            // Если ответ не выбран, просто сбрасываем подсветку
+            highlightQuestion(qDiv, undefined, correctValue);
         }
     });
 
