@@ -1,9 +1,10 @@
 let quizData = [];          // все вопросы из quiz.json
 let currentMode = 'radio';   // 'radio' или 'match'
 let currentQuestions = [];   // текущие вопросы (для radio)
-let matchPairs = [];         // данные для блочного режима: [{ question, answer, qId, aId }]
+let matchQuestions = [];     // данные для блочного режима: массив вопросов { qId, text }
+let matchAnswers = [];       // данные для блочного режима: массив ответов { aId, text, questionId, isCorrect }
 let matchState = {
-    selected: null,          // { type: 'question', id } или null
+    selected: null,          // { type: 'question', id } или { type: 'answer', id } или null
     pairs: [],               // [{ qId, aId }] успешные пары
 };
 
@@ -20,7 +21,8 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
         currentMode = e.target.value;
         document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
-        document.getElementById('quizControls').style.display = 'none';
+        // Скрываем кнопку "Проверить" в блочном режиме
+        document.getElementById('quizCheckBtn').style.display = currentMode === 'radio' ? 'inline-block' : 'none';
     });
 });
 
@@ -57,15 +59,11 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
 // ------------------ Обычный режим (radio) ------------------
 function startRadioQuiz(selectedIndices) {
-    // Очищаем данные блочного режима, чтобы не мешали
-    document.getElementById('matchQuestions').innerHTML = '';
-    document.getElementById('matchAnswers').innerHTML = '';
-    matchPairs = [];
-    matchState = { selected: null, pairs: [] };
-    const canvas = document.getElementById('matchCanvas');
-    if (canvas) {
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    }
+    // Показываем кнопку "Проверить"
+    document.getElementById('quizCheckBtn').style.display = 'inline-block';
+
+    // Очищаем данные блочного режима
+    clearMatchData();
 
     const questionsByTopic = {};
     selectedIndices.forEach(idx => {
@@ -185,64 +183,24 @@ function checkRadioQuiz() {
 
 // ------------------ Блочный режим (match) ------------------
 function startMatchQuiz(selectedIndices) {
+    // Скрываем кнопку "Проверить"
+    document.getElementById('quizCheckBtn').style.display = 'none';
+
     // Очищаем данные радио-режима
     document.getElementById("quizContainer").innerHTML = "";
     currentQuestions = [];
 
-    const questionsByTopic = {};
-    selectedIndices.forEach(idx => {
-        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
-    });
+    // Генерируем данные для блочного режима с 2-3 вариантами на вопрос
+    const { questions, answers } = generateMatchData(selectedIndices);
+    matchQuestions = questions;
+    matchAnswers = answers;
 
-    let selectedPairs = [];
-
-    if (selectedIndices.length === 1) {
-        // Одна тема: берём 3 случайных вопроса
-        const topicIdx = selectedIndices[0];
-        const topicQuestions = questionsByTopic[topicIdx];
-        if (topicQuestions.length === 0) {
-            alert("В выбранной теме нет вопросов.");
-            return;
-        }
-        const shuffled = [...topicQuestions].sort(() => Math.random() - 0.5);
-        const chosen = shuffled.slice(0, Math.min(3, shuffled.length));
-        selectedPairs = chosen.map(q => ({
-            question: q.question,
-            answer: q.options[q.correct],
-            qId: `q_${Math.random()}`,
-            aId: `a_${Math.random()}`,
-            correctIdx: q.correct,
-        }));
-    } else {
-        // Несколько тем: по одному вопросу из каждой
-        selectedIndices.forEach(idx => {
-            const topicQuestions = questionsByTopic[idx];
-            if (topicQuestions.length > 0) {
-                const randomIndex = Math.floor(Math.random() * topicQuestions.length);
-                const q = topicQuestions[randomIndex];
-                selectedPairs.push({
-                    question: q.question,
-                    answer: q.options[q.correct],
-                    qId: `q_${Math.random()}`,
-                    aId: `a_${Math.random()}`,
-                    correctIdx: q.correct,
-                });
-            }
-        });
-    }
-
-    if (selectedPairs.length === 0) {
+    if (questions.length === 0 || answers.length === 0) {
         alert("Нет вопросов для выбранных тем.");
         return;
     }
 
-    // Перемешиваем ответы
-    const answers = selectedPairs.map(p => ({ answer: p.answer, aId: p.aId }));
-    const shuffledAnswers = [...answers].sort(() => Math.random() - 0.5);
-
-    matchPairs = selectedPairs;
-
-    renderMatchQuiz(selectedPairs, shuffledAnswers);
+    renderMatchQuiz(questions, answers);
 
     document.getElementById('quizContainer').classList.add('hidden');
     document.getElementById('matchContainer').classList.remove('hidden');
@@ -251,30 +209,98 @@ function startMatchQuiz(selectedIndices) {
     matchState = { selected: null, pairs: [] };
 }
 
+function generateMatchData(selectedIndices) {
+    const questions = [];
+    const answers = [];
+    const questionsByTopic = {};
+
+    // Собираем вопросы по темам
+    selectedIndices.forEach(idx => {
+        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
+    });
+
+    // Если выбрана одна тема, берём 3 случайных вопроса, иначе по одному из каждой
+    let selectedQuestions = [];
+    if (selectedIndices.length === 1) {
+        const topicIdx = selectedIndices[0];
+        const topicQuestions = questionsByTopic[topicIdx];
+        if (topicQuestions.length > 0) {
+            const shuffled = [...topicQuestions].sort(() => Math.random() - 0.5);
+            selectedQuestions = shuffled.slice(0, Math.min(3, shuffled.length));
+        }
+    } else {
+        selectedIndices.forEach(idx => {
+            const topicQuestions = questionsByTopic[idx];
+            if (topicQuestions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * topicQuestions.length);
+                selectedQuestions.push(topicQuestions[randomIndex]);
+            }
+        });
+    }
+
+    if (selectedQuestions.length === 0) return { questions: [], answers: [] };
+
+    // Для каждого вопроса выбираем правильный ответ + 1-2 случайных неправильных
+    selectedQuestions.forEach((q, idx) => {
+        const qId = `q_${idx}_${Math.random()}`;
+        questions.push({
+            qId: qId,
+            text: q.question,
+        });
+
+        // Правильный ответ
+        const correctAnswer = {
+            aId: `a_${idx}_correct_${Math.random()}`,
+            text: q.options[q.correct],
+            questionId: qId,
+            isCorrect: true,
+        };
+        answers.push(correctAnswer);
+
+        // Неправильные ответы (исключаем правильный)
+        const incorrectOptions = q.options.filter((_, optIdx) => optIdx !== q.correct);
+        // Случайно выбираем 1 или 2 из них
+        const numIncorrect = Math.random() < 0.5 ? 1 : 2; // 50% на 1, 50% на 2
+        const shuffledIncorrect = [...incorrectOptions].sort(() => Math.random() - 0.5);
+        const selectedIncorrect = shuffledIncorrect.slice(0, numIncorrect);
+
+        selectedIncorrect.forEach((opt, i) => {
+            answers.push({
+                aId: `a_${idx}_incorrect_${i}_${Math.random()}`,
+                text: opt,
+                questionId: qId,
+                isCorrect: false,
+            });
+        });
+    });
+
+    // Перемешиваем ответы
+    const shuffledAnswers = [...answers].sort(() => Math.random() - 0.5);
+    return { questions, answers: shuffledAnswers };
+}
+
 function renderMatchQuiz(questions, answers) {
     const leftCol = document.getElementById("matchQuestions");
     const rightCol = document.getElementById("matchAnswers");
     leftCol.innerHTML = '';
     rightCol.innerHTML = '';
 
-    questions.forEach((q, idx) => {
+    questions.forEach((q) => {
         const block = document.createElement("div");
         block.className = "match-block";
         block.dataset.id = q.qId;
         block.dataset.type = "question";
-        block.dataset.index = idx;
-        block.textContent = q.question;
+        block.textContent = q.text;
         block.addEventListener('click', onMatchBlockClick);
         leftCol.appendChild(block);
     });
 
-    answers.forEach((a, idx) => {
+    answers.forEach((a) => {
         const block = document.createElement("div");
         block.className = "match-block";
         block.dataset.id = a.aId;
         block.dataset.type = "answer";
-        block.dataset.index = idx;
-        block.textContent = a.answer;
+        block.textContent = a.text;
         block.addEventListener('click', onMatchBlockClick);
         rightCol.appendChild(block);
     });
@@ -305,14 +331,17 @@ function onMatchBlockClick(e) {
         return;
     }
 
+    // Пытаемся соединить вопрос и ответ
     if (selected.type !== type) {
         const questionBlock = selected.type === 'question' ? selected.element : block;
         const answerBlock = selected.type === 'answer' ? selected.element : block;
         const questionId = questionBlock.dataset.id;
         const answerId = answerBlock.dataset.id;
 
-        const pair = matchPairs.find(p => p.qId === questionId && p.aId === answerId);
-        if (pair) {
+        // Находим соответствующий ответ в данных
+        const answer = matchAnswers.find(a => a.aId === answerId);
+        if (answer && answer.questionId === questionId && answer.isCorrect) {
+            // Правильное соединение
             matchState.pairs.push({ qId: questionId, aId: answerId });
             questionBlock.classList.add('matched');
             answerBlock.classList.add('matched');
@@ -320,11 +349,13 @@ function onMatchBlockClick(e) {
             matchState.selected = null;
             drawMatchLines();
         } else {
+            // Неправильное соединение
             drawTempLine(questionBlock, answerBlock, 'red');
             clearSelected();
             matchState.selected = null;
         }
     } else {
+        // Оба элемента одного типа - просто переключаем выделение
         clearSelected();
         block.classList.add('selected');
         matchState.selected = { type, id, element: block };
@@ -387,20 +418,26 @@ function drawLineBetween(el1, el2, ctx, color, width) {
     ctx.stroke();
 }
 
+// Очистка данных блочного режима
+function clearMatchData() {
+    document.getElementById('matchQuestions').innerHTML = '';
+    document.getElementById('matchAnswers').innerHTML = '';
+    matchQuestions = [];
+    matchAnswers = [];
+    matchState = { selected: null, pairs: [] };
+    const canvas = document.getElementById('matchCanvas');
+    if (canvas) {
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
 // Сброс теста (общий для обоих режимов)
 document.getElementById("quizResetBtn").addEventListener("click", function() {
     if (currentMode === 'radio') {
         document.getElementById("quizContainer").innerHTML = "";
         currentQuestions = [];
     } else {
-        document.getElementById("matchQuestions").innerHTML = "";
-        document.getElementById("matchAnswers").innerHTML = "";
-        matchPairs = [];
-        matchState = { selected: null, pairs: [] };
-        const canvas = document.getElementById('matchCanvas');
-        if (canvas) {
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        }
+        clearMatchData();
     }
     document.getElementById("quizControls").style.display = "none";
     
