@@ -9,8 +9,8 @@ fetch("db/topics.json")
         topics = data.topics;
         renderMenu(topics, null);
         renderTopicCheckboxes();
-        renderPrintCheckboxes(); // Заполняем список для печати
-        updateBreadcrumbs(['Главная']); // начальное состояние
+        renderPrintCheckboxes();
+        updateBreadcrumbs(['Главная']);
     });
 
 // Универсальная функция для плавной смены содержимого меню
@@ -125,12 +125,11 @@ function updateBreadcrumbs(path) {
     }
     container.innerHTML = html;
 
-    // Обработка кликов на ссылки хлебных крошек (кроме последнего)
     container.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const index = parseInt(e.target.dataset.index, 10);
-            if (index === 0) { // Главная
+            if (index === 0) {
                 showMainScreen();
             }
         });
@@ -145,15 +144,13 @@ function showMainScreen() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
-    document.getElementById("info").style.display = "none";   // скрываем блок важного/ошибок/советов
+    document.getElementById("info").style.display = "none";
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
     
-    // Если текущее меню — оглавление темы, переключаем на список тем
     if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, null);
     }
-    // Иначе ничего не делаем, меню уже список тем
     
     updateBreadcrumbs(['Главная']);
 }
@@ -179,7 +176,6 @@ function loadTopic(topic) {
     examplesSection.style.display = "block";
     screensSection.style.display = "block";
 
-    // info будет показан ниже, если есть контент
     info.style.display = "block";
 
     [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), info, document.getElementById("screens")].forEach(el => {
@@ -337,11 +333,9 @@ function showMainMenu() {
     }
     document.getElementById("backToTopics").style.display = "none";
 
-    // Если текущее меню — оглавление темы, переключаем на список тем
     if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
     }
-    // Иначе ничего не делаем, меню уже список тем
 }
 
 // Генерация печатной версии (PDF) для выбранных тем
@@ -356,7 +350,6 @@ function generatePrintVersion(selectedIndices) {
         return;
     }
 
-    // Собираем HTML-контент только для выбранных тем
     let contentHTML = `
         <!DOCTYPE html>
         <html>
@@ -387,7 +380,6 @@ function generatePrintVersion(selectedIndices) {
             <h1>C# Краткий учебник - Избранные темы</h1>
     `;
 
-    // Сортируем выбранные индексы по порядку
     selectedIndices.sort((a, b) => a - b);
 
     selectedIndices.forEach(index => {
@@ -436,12 +428,10 @@ function generatePrintVersion(selectedIndices) {
 
     contentHTML += `</body></html>`;
 
-    // Открываем новое окно и записываем HTML
     const printWindow = window.open('', '_blank');
     printWindow.document.write(contentHTML);
     printWindow.document.close();
 
-    // Ждём загрузки ресурсов (изображения) и вызываем печать
     printWindow.onload = function() {
         printWindow.print();
     };
@@ -553,7 +543,7 @@ document.getElementById("generatePrintBtn").addEventListener("click", function()
     const checkboxes = document.querySelectorAll('#printTopicsList input[type="checkbox"]:checked');
     const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
     generatePrintVersion(selectedIndices);
-    document.getElementById("printPanel").classList.add("hidden"); // закрываем панель после генерации
+    document.getElementById("printPanel").classList.add("hidden");
 });
 
 // Функция для создания чекбоксов тем для теста

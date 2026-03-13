@@ -22,7 +22,6 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
         document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
         document.getElementById('quizCheckBtn').style.display = currentMode === 'radio' ? 'inline-block' : 'none';
-        // Скрываем результат при смене режима
         document.getElementById('quizResult').classList.add('hidden');
     });
 });
@@ -34,7 +33,6 @@ document.getElementById('toggleQuizSettingsBtn').addEventListener('click', funct
     
     settingsPanel.classList.toggle('hidden');
     testArea.classList.toggle('hidden');
-    // Скрываем результат
     document.getElementById('quizResult').classList.add('hidden');
 });
 
@@ -50,7 +48,7 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
     document.getElementById('quizSettingsPanel').classList.add('hidden');
     document.getElementById('quizTestArea').classList.remove('hidden');
-    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат при новом тесте
+    document.getElementById('quizResult').classList.add('hidden');
 
     if (currentMode === 'radio') {
         startRadioQuiz(selectedIndices);
@@ -94,7 +92,6 @@ function startRadioQuiz(selectedIndices) {
 // Подсветка конкретного вопроса (для radio)
 function highlightQuestion(questionDiv, selectedValue, correctValue) {
     const options = questionDiv.querySelectorAll('.quiz-option');
-    // Сброс классов подсветки
     options.forEach(opt => {
         opt.classList.remove('correct-option', 'incorrect-option');
     });
@@ -181,7 +178,6 @@ function checkRadioQuiz() {
                 correctCount++;
             }
         } else {
-            // Если ответ не выбран, просто сбрасываем подсветку
             highlightQuestion(qDiv, undefined, correctValue);
         }
     });
@@ -215,7 +211,7 @@ function startMatchQuiz(selectedIndices) {
     document.getElementById("quizControls").style.display = "flex";
 
     matchState = { selected: null, pairs: [] };
-    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат для match
+    document.getElementById('quizResult').classList.add('hidden');
 }
 
 function generateMatchData(selectedIndices) {
@@ -440,5 +436,5 @@ document.getElementById("quizResetBtn").addEventListener("click", function() {
     
     document.getElementById('quizSettingsPanel').classList.remove('hidden');
     document.getElementById('quizTestArea').classList.add('hidden');
-    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат при сбросе
+    document.getElementById('quizResult').classList.add('hidden');
 });
