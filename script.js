@@ -1,5 +1,6 @@
 let topics = [];
 let currentTopic = null;
+let isMenuAnimating = false;
 
 fetch("topics.json")
     .then(r => r.json())
@@ -7,6 +8,19 @@ fetch("topics.json")
         topics = data.topics;
         renderMenu(topics, null);
     });
+
+// Универсальная функция для плавной смены содержимого меню
+function switchMenu(renderFunc, ...args) {
+    if (isMenuAnimating) return;
+    const menu = document.getElementById("menu");
+    isMenuAnimating = true;
+    menu.classList.add("menu-hidden");
+    setTimeout(() => {
+        renderFunc(...args);
+        menu.classList.remove("menu-hidden");
+        isMenuAnimating = false;
+    }, 250);
+}
 
 // Отображение главного меню (список тем)
 function renderMenu(list, activeTitle) {
@@ -33,18 +47,22 @@ function renderTopicMenu(topic) {
     const menu = document.getElementById("menu");
     menu.innerHTML = "";
 
+    // Пункт "Теория"
     addMenuItem(menu, "📘 Теория", "theory");
 
+    // Пункт "Важная информация" (если есть)
     if (topic.important || topic.error || topic.tip) {
         addMenuItem(menu, "⚠️ Важное", "info");
     }
 
+    // Пункты для каждого примера
     if (topic.examples && topic.examples.length > 0) {
         topic.examples.forEach((ex, idx) => {
             addMenuItem(menu, `📄 ${ex.name}`, `example-${idx}`);
         });
     }
 
+    // Пункт "Скриншоты" (если есть)
     if (topic.screens && topic.screens.length > 0) {
         addMenuItem(menu, "🖼️ Скриншоты", "screens");
     }
@@ -62,6 +80,7 @@ function addMenuItem(menu, text, targetId) {
     li.onclick = (e) => {
         e.stopPropagation();
         scrollToElement(targetId);
+        // На мобильных устройствах закрываем сайдбар после выбора
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById("sidebar");
             if (sidebar.classList.contains("show")) {
@@ -236,8 +255,16 @@ function loadTopic(topic) {
         block.classList.add('hljs');
     });
 
-    renderTopicMenu(topic);
+    // Показываем заголовок темы и кнопку "Назад"
+    const currentTopicTitle = document.getElementById("currentTopicTitle");
+    if (currentTopicTitle) {
+        currentTopicTitle.textContent = topic.title;
+        currentTopicTitle.style.display = "block";
+    }
     document.getElementById("backToTopics").style.display = "block";
+
+    // Плавно переключаем меню на меню темы
+    switchMenu(renderTopicMenu, topic);
 
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
@@ -248,11 +275,20 @@ function loadTopic(topic) {
     }
 }
 
+// Возврат к главному меню
 function showMainMenu() {
+    // Скрываем заголовок темы и кнопку "Назад"
+    const currentTopicTitle = document.getElementById("currentTopicTitle");
+    if (currentTopicTitle) {
+        currentTopicTitle.style.display = "none";
+    }
     document.getElementById("backToTopics").style.display = "none";
-    renderMenu(topics, currentTopic ? currentTopic.title : null);
+
+    // Плавно возвращаем главное меню
+    switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
 }
 
+// Обработчики событий
 document.getElementById("search").addEventListener("input", filterMenu);
 
 document.getElementById("toggleMenu").addEventListener("click", function(e) {
@@ -297,4 +333,9 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("screensSection").style.display = "none";
     document.getElementById("title").classList.add("hidden");
     document.getElementById("backToTopics").style.display = "none";
+    // Скрываем заголовок темы при старте
+    const currentTopicTitle = document.getElementById("currentTopicTitle");
+    if (currentTopicTitle) {
+        currentTopicTitle.style.display = "none";
+    }
 });

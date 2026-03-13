@@ -44,6 +44,15 @@ body {
     box-sizing: border-box;
 }
 
+#currentTopicTitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #fff;
+    padding: 0 5px;
+    word-break: break-word;
+}
+
 #backButton {
     width: 100%;
     background: #34344e;
@@ -54,17 +63,25 @@ body {
     cursor: pointer;
     text-align: left;
     font-size: 14px;
+    margin-bottom: 10px;
 }
 
 #backButton:hover {
     background: #4a4a6a;
 }
 
-.sidebar ul {
+#menu {
     list-style: none;
     padding: 0;
     margin: 0;
     flex: 1;
+    transition: opacity 0.25s ease-in-out;
+    opacity: 1;
+}
+
+#menu.menu-hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebar li {
