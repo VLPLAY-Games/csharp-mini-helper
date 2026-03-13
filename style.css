@@ -347,7 +347,7 @@ button:hover {
     }
 }
 
-/* ===== Стили для теста (без изменений) ===== */
+/* ===== Стили для теста ===== */
 .quiz-start-btn {
     background: #4a7cff;
     color: white;
@@ -781,4 +781,9 @@ button:hover {
     .print-topics-list {
         grid-template-columns: 1fr;
     }
+}
+
+.print-btn-div {
+    position: absolute; 
+    bottom: 50px;
 }
