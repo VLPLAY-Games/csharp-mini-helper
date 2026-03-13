@@ -541,6 +541,27 @@ button:hover {
     background: #5a6268;
 }
 
+/* Блок результата теста */
+.quiz-result {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f0f2f8;
+    border: 1px solid #d0d4e8;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+}
+.quiz-result .correct-count {
+    color: #28a745;
+    font-weight: bold;
+}
+.quiz-result .total-count {
+    color: #4a7cff;
+    font-weight: bold;
+}
+
 .quiz-mode-selector {
     display: flex;
     gap: 20px;

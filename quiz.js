@@ -22,6 +22,8 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
         document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
         document.getElementById('quizCheckBtn').style.display = currentMode === 'radio' ? 'inline-block' : 'none';
+        // Скрываем результат при смене режима
+        document.getElementById('quizResult').classList.add('hidden');
     });
 });
 
@@ -32,6 +34,8 @@ document.getElementById('toggleQuizSettingsBtn').addEventListener('click', funct
     
     settingsPanel.classList.toggle('hidden');
     testArea.classList.toggle('hidden');
+    // Скрываем результат
+    document.getElementById('quizResult').classList.add('hidden');
 });
 
 // Начать тест
@@ -46,6 +50,7 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
     document.getElementById('quizSettingsPanel').classList.add('hidden');
     document.getElementById('quizTestArea').classList.remove('hidden');
+    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат при новом тесте
 
     if (currentMode === 'radio') {
         startRadioQuiz(selectedIndices);
@@ -137,15 +142,6 @@ function renderRadioQuiz(questions) {
             optionLabel.appendChild(radio);
             optionLabel.appendChild(codeSpan);
             optionsDiv.appendChild(optionLabel);
-
-            // Добавляем обработчик для мгновенной проверки
-            radio.addEventListener('change', function(e) {
-                const questionDiv = this.closest('.quiz-question');
-                const questionIndex = questionDiv.dataset.questionIndex;
-                const currentQ = currentQuestions[questionIndex];
-                const selectedValue = parseInt(this.value, 10);
-                highlightQuestion(questionDiv, selectedValue, currentQ.correct);
-            });
         });
 
         questionDiv.appendChild(optionsDiv);
@@ -190,7 +186,10 @@ function checkRadioQuiz() {
         }
     });
 
-    alert(`Правильных ответов: ${correctCount} из ${questions.length}`);
+    // Отображаем результат в блоке
+    const resultDiv = document.getElementById('quizResult');
+    resultDiv.innerHTML = `<span class="correct-count">${correctCount}</span> из <span class="total-count">${questions.length}</span> правильных ответов.`;
+    resultDiv.classList.remove('hidden');
 }
 
 // ------------------ Блочный режим (match) ------------------
@@ -216,6 +215,7 @@ function startMatchQuiz(selectedIndices) {
     document.getElementById("quizControls").style.display = "flex";
 
     matchState = { selected: null, pairs: [] };
+    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат для match
 }
 
 function generateMatchData(selectedIndices) {
@@ -440,4 +440,5 @@ document.getElementById("quizResetBtn").addEventListener("click", function() {
     
     document.getElementById('quizSettingsPanel').classList.remove('hidden');
     document.getElementById('quizTestArea').classList.add('hidden');
+    document.getElementById('quizResult').classList.add('hidden'); // скрыть результат при сбросе
 });

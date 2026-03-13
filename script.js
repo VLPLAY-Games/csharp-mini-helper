@@ -142,6 +142,7 @@ function showMainScreen() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
+    document.getElementById("info").style.display = "none";   // <-- скрываем блок важного/ошибок/советов
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
     if (currentTopic) {
@@ -170,6 +171,9 @@ function loadTopic(topic) {
     theorySection.style.display = "block";
     examplesSection.style.display = "block";
     screensSection.style.display = "block";
+
+    // info будет показан ниже, если есть контент
+    info.style.display = "block";
 
     [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), info, document.getElementById("screens")].forEach(el => {
         if (el) {
@@ -318,7 +322,7 @@ function loadTopic(topic) {
     updateBreadcrumbs(['Главная', topic.title]);
 }
 
-// Возврат к главному меню
+// Возврат к главному меню (список тем), но контент текущей темы остаётся видимым
 function showMainMenu() {
     const currentTopicTitle = document.getElementById("currentTopicTitle");
     if (currentTopicTitle) {
@@ -326,11 +330,10 @@ function showMainMenu() {
     }
     document.getElementById("backToTopics").style.display = "none";
 
+    // Переключаем меню на список тем, сохраняя подсветку активной темы
     switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
 
-    // Оставляем экран темы видимым? нет, мы возвращаемся на главную
-    // но основной контент остаётся с темой? нужно скрыть тему и показать главный экран
-    showMainScreen();
+    // НЕ вызываем showMainScreen, чтобы не скрывать контент темы
 }
 
 // Обработчики событий
@@ -382,6 +385,8 @@ document.addEventListener("DOMContentLoaded", function() {
     if (currentTopicTitle) {
         currentTopicTitle.style.display = "none";
     }
+    // Дополнительно скрываем info при загрузке
+    document.getElementById("info").style.display = "none";
 });
 
 // Обработчик кнопки перехода к тесту
@@ -392,6 +397,7 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
+    document.getElementById("info").style.display = "none";   // скрываем info в тесте
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
     if (currentTopic) {
