@@ -21,7 +21,7 @@
             
             <div class="sidebar-footer">
                 <p>Разработано VLPLAY Games</p>
-                <p>Версия 0.7</p>
+                <p>Версия 0.8</p>
             </div>
         </div>
 
@@ -37,12 +37,12 @@
             <div id="quizScreen" class="hidden fadeIn">
                 <h2>📋 Тест по C#</h2>
                 <div id="quizTopicSelector">
-                    <label>Темы с 
-                        <select id="quizTopicStart" class="quiz-topic-select"></select>
-                    </label>
-                    <label>по 
-                        <select id="quizTopicEnd" class="quiz-topic-select"></select>
-                    </label>
+                    <p>Выберите темы для теста:</p>
+                    <div id="quizTopicsList" class="quiz-topics-list"></div>
+                    <div class="quiz-topic-buttons">
+                        <button id="quizSelectAllBtn">Выбрать все</button>
+                        <button id="quizDeselectAllBtn">Сбросить все</button>
+                    </div>
                     <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
                 </div>
                 <div id="quizContainer" class="quiz-container"></div>

@@ -7,8 +7,8 @@ fetch("topics.json")
     .then(data => {
         topics = data.topics;
         renderMenu(topics, null);
-        // Заполняем селекты выбора тем для теста после загрузки списка тем
-        if (typeof fillTopicSelects === 'function') fillTopicSelects();
+        // Создаём чекбоксы для выбора тем в тесте
+        renderTopicCheckboxes();
     });
 
 // Универсальная функция для плавной смены содержимого меню
@@ -366,27 +366,34 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     }
 });
 
-// Функция для заполнения селектов тем (будет вызвана после загрузки topics)
-function fillTopicSelects() {
-    const startSelect = document.getElementById("quizTopicStart");
-    const endSelect = document.getElementById("quizTopicEnd");
-    if (!startSelect || !endSelect) return;
-    startSelect.innerHTML = '';
-    endSelect.innerHTML = '';
-    for (let i = 0; i < topics.length; i++) {
-        const optionStart = document.createElement('option');
-        optionStart.value = i;
-        optionStart.textContent = `${i+1}. ${topics[i].title}`;
-        startSelect.appendChild(optionStart);
+// Функция для создания чекбоксов тем
+function renderTopicCheckboxes() {
+    const container = document.getElementById("quizTopicsList");
+    if (!container) return;
+    container.innerHTML = "";
+    topics.forEach((topic, index) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "quiz-topic-item";
 
-        const optionEnd = document.createElement('option');
-        optionEnd.value = i;
-        optionEnd.textContent = `${i+1}. ${topics[i].title}`;
-        endSelect.appendChild(optionEnd);
-    }
-    // По умолчанию выбираем диапазон 1-3
-    if (topics.length > 0) {
-        startSelect.selectedIndex = 0;
-        endSelect.selectedIndex = Math.min(2, topics.length-1);
-    }
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `topic_${index}`;
+        checkbox.value = index;
+
+        const label = document.createElement("label");
+        label.htmlFor = `topic_${index}`;
+        label.textContent = `${index+1}. ${topic.title}`;
+
+        itemDiv.appendChild(checkbox);
+        itemDiv.appendChild(label);
+        container.appendChild(itemDiv);
+    });
 }
+
+// Обработчики для кнопок "Выбрать все" и "Сбросить"
+document.getElementById("quizSelectAllBtn").addEventListener("click", function() {
+    document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+});
+document.getElementById("quizDeselectAllBtn").addEventListener("click", function() {
+    document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+});

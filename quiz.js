@@ -1,5 +1,4 @@
 let quizData = [];          // все вопросы из quiz.json
-let filteredQuestions = []; // вопросы после фильтрации по темам
 let currentQuiz = null;     // текущий отображаемый набор вопросов
 
 // Загружаем вопросы при старте
@@ -9,28 +8,43 @@ fetch("quiz.json")
         quizData = data.questions; // ожидаем массив вопросов
     });
 
-// Заполнение селектов тем вызывается из script.js после загрузки topics
-// (функция fillTopicSelects уже определена в script.js)
-
 // Начать тест
 document.getElementById("quizStartBtn").addEventListener("click", function() {
-    const start = parseInt(document.getElementById("quizTopicStart").value, 10);
-    const end = parseInt(document.getElementById("quizTopicEnd").value, 10);
-    if (start > end) {
-        alert("Начальная тема не может быть больше конечной.");
+    // Собираем выбранные темы
+    const checkboxes = document.querySelectorAll('#quizTopicsList input[type="checkbox"]:checked');
+    const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+
+    if (selectedIndices.length === 0) {
+        alert("Выберите хотя бы одну тему.");
         return;
     }
 
-    // Фильтруем вопросы по диапазону тем (индексы от start до end включительно)
-    filteredQuestions = quizData.filter(q => q.topicIndex >= start && q.topicIndex <= end);
+    // Фильтруем вопросы по выбранным темам
+    const questionsByTopic = {};
+    selectedIndices.forEach(idx => {
+        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
+    });
 
-    if (filteredQuestions.length === 0) {
+    // Для каждой темы случайно выбираем один вопрос (если есть)
+    const selectedQuestions = [];
+    selectedIndices.forEach(idx => {
+        const topicQuestions = questionsByTopic[idx];
+        if (topicQuestions.length > 0) {
+            const randomIndex = Math.floor(Math.random() * topicQuestions.length);
+            selectedQuestions.push(topicQuestions[randomIndex]);
+        }
+    });
+
+    if (selectedQuestions.length === 0) {
         alert("В выбранных темах нет вопросов.");
         return;
     }
 
+    // Перемешиваем вопросы, чтобы они шли в случайном порядке
+    selectedQuestions.sort(() => Math.random() - 0.5);
+
     // Отображаем вопросы
-    renderQuiz(filteredQuestions);
+    renderQuiz(selectedQuestions);
     document.getElementById("quizControls").style.display = "flex";
 });
 
@@ -105,16 +119,14 @@ document.getElementById("quizCheckBtn").addEventListener("click", function() {
             correctCount++;
         } else {
             qDiv.classList.add("incorrect");
-            // Можно подсветить правильный вариант (зеленым) и неправильный (красным)
-            // Для этого можно перебрать варианты
+            // Подсвечиваем правильный вариант зелёным, выбранный неправильный красным
             const options = qDiv.querySelectorAll('.quiz-option');
             options.forEach((opt, optIdx) => {
+                opt.style.border = ''; // сброс
                 if (optIdx === correctValue) {
                     opt.style.border = '2px solid #28a745';
                 } else if (optIdx === selectedValue) {
                     opt.style.border = '2px solid #dc3545';
-                } else {
-                    opt.style.border = '';
                 }
             });
         }
@@ -128,4 +140,5 @@ document.getElementById("quizResetBtn").addEventListener("click", function() {
     document.getElementById("quizContainer").innerHTML = "";
     document.getElementById("quizControls").style.display = "none";
     currentQuiz = null;
+    // Также можно сбросить выделение чекбоксов? Оставим как есть.
 });

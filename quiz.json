@@ -1,103 +1,39 @@
 {
     "questions": [
-        {
-            "topicIndex": 0,
-            "question": "Какой пункт нужно выбрать в Visual Studio для создания Windows Forms приложения?",
-            "options": [
-                "Консольное приложение",
-                "Приложение Windows Forms (.NET Framework)",
-                "Библиотека классов",
-                "Пустой проект"
-            ],
-            "correct": 1
-        },
-        {
-            "topicIndex": 0,
-            "question": "Где находится исполняемый файл (.exe) после компиляции?",
-            "options": [
-                "В папке проекта",
-                "В папке bin\\Debug или bin\\Release",
-                "В папке obj",
-                "На рабочем столе"
-            ],
-            "correct": 1
-        },
-        {
-            "topicIndex": 1,
-            "question": "Какой метод используется для вывода текста в консоль с переходом на новую строку?",
-            "options": [
-                "Console.Write()",
-                "Console.ReadLine()",
-                "Console.WriteLine()",
-                "Console.Print()"
-            ],
-            "correct": 2
-        },
-        {
-            "topicIndex": 1,
-            "question": "Как преобразовать строку в целое число с помощью Convert?",
-            "options": [
-                "int.Parse(string)",
-                "Convert.ToInt32(string)",
-                "(int)string",
-                "string.ToInt()"
-            ],
-            "correct": 1
-        },
-        {
-            "topicIndex": 2,
-            "question": "Какой цикл гарантированно выполнится хотя бы один раз?",
-            "options": [
-                "for",
-                "while",
-                "do while",
-                "foreach"
-            ],
-            "correct": 2
-        },
-        {
-            "topicIndex": 2,
-            "question": "Как получить случайное целое число от 1 до 5 (включительно)?",
-            "options": [
-                "r.Next(1, 6)",
-                "r.Next(1, 5)",
-                "r.Next(5)",
-                "r.NextDouble() * 5"
-            ],
-            "correct": 0
-        },
-        {
-            "topicIndex": 3,
-            "question": "Какое событие возникает при клике на кнопку?",
-            "options": [
-                "TextChanged",
-                "Click",
-                "Load",
-                "SelectedIndexChanged"
-            ],
-            "correct": 1
-        },
-        {
-            "topicIndex": 4,
-            "question": "Какое свойство задает позицию элемента на форме?",
-            "options": [
-                "Position",
-                "Coordinates",
-                "Location",
-                "Point"
-            ],
-            "correct": 2
-        },
-        {
-            "topicIndex": 5,
-            "question": "Какой элемент позволяет выбрать только один вариант из группы?",
-            "options": [
-                "CheckBox",
-                "RadioButton",
-                "GroupBox",
-                "ListBox"
-            ],
-            "correct": 1
-        }
+        { "topicIndex": 0, "question": "Какой пункт нужно выбрать в Visual Studio для создания Windows Forms приложения?", "options": ["Консольное приложение", "Приложение Windows Forms (.NET Framework)", "Библиотека классов", "Пустой проект"], "correct": 1 },
+        { "topicIndex": 0, "question": "Где находится исполняемый файл (.exe) после компиляции?", "options": ["В папке проекта", "В папке bin\\Debug или bin\\Release", "В папке obj", "На рабочем столе"], "correct": 1 },
+        { "topicIndex": 0, "question": "Какое окно в Visual Studio показывает все файлы проекта?", "options": ["Панель элементов", "Обозреватель решений", "Окно свойств", "Командная строка"], "correct": 1 },
+        { "topicIndex": 0, "question": "Как запустить проект с отладкой?", "options": ["Ctrl+F5", "F5", "Shift+F5", "Ctrl+Shift+B"], "correct": 1 },
+        { "topicIndex": 0, "question": "Для чего используется окно свойств (Properties)?", "options": ["Для редактирования кода", "Для изменения свойств выбранного элемента", "Для компиляции проекта", "Для управления версиями"], "correct": 1 },
+        { "topicIndex": 1, "question": "Какой метод используется для вывода текста в консоль с переходом на новую строку?", "options": ["Console.Write()", "Console.ReadLine()", "Console.WriteLine()", "Console.Print()"], "correct": 2 },
+        { "topicIndex": 1, "question": "Как преобразовать строку в целое число с помощью Convert?", "options": ["int.Parse(string)", "Convert.ToInt32(string)", "(int)string", "string.ToInt()"], "correct": 1 },
+        { "topicIndex": 1, "question": "Что возвращает Console.ReadLine()?", "options": ["Целое число", "Строку", "Число с плавающей точкой", "Логическое значение"], "correct": 1 },
+        { "topicIndex": 1, "question": "Как преобразовать число в строку?", "options": ["number.ToString()", "(string)number", "Convert.ToDouble(number)", "number.Parse()"], "correct": 0 },
+        { "topicIndex": 1, "question": "Какое пространство имён нужно подключить для работы с консолью?", "options": ["System.Text", "System.IO", "System", "System.Console"], "correct": 2 },
+        { "topicIndex": 2, "question": "Какой цикл гарантированно выполнится хотя бы один раз?", "options": ["for", "while", "do while", "foreach"], "correct": 2 },
+        { "topicIndex": 2, "question": "Как получить случайное целое число от 1 до 5 (включительно)?", "options": ["r.Next(1, 6)", "r.Next(1, 5)", "r.Next(5)", "r.NextDouble() * 5"], "correct": 0 },
+        { "topicIndex": 2, "question": "Какой тип цикла лучше использовать, когда известно количество повторений?", "options": ["while", "do while", "for", "foreach"], "correct": 2 },
+        { "topicIndex": 2, "question": "Что вернёт r.NextDouble()?", "options": ["Целое число от 0 до 10", "Вещественное число от 0 до 1", "Вещественное число от 0 до 100", "Целое число от 0 до 1"], "correct": 1 },
+        { "topicIndex": 2, "question": "Как создать генератор случайных чисел?", "options": ["new Random", "Random()", "new Random()", "Random.Create()"], "correct": 2 },
+        { "topicIndex": 3, "question": "Какое событие возникает при клике на кнопку?", "options": ["TextChanged", "Click", "Load", "SelectedIndexChanged"], "correct": 1 },
+        { "topicIndex": 3, "question": "Как изменить текст на кнопке в обработчике?", "options": ["button1.Text = 'Новый текст';", "button1.Caption = 'Новый текст';", "button1.Value = 'Новый текст';", "button1.Name = 'Новый текст';"], "correct": 0 },
+        { "topicIndex": 3, "question": "Какое событие срабатывает при изменении текста в TextBox?", "options": ["Click", "TextChanged", "ValueChanged", "KeyPress"], "correct": 1 },
+        { "topicIndex": 3, "question": "Как вывести сообщение пользователю в Windows Forms?", "options": ["Console.WriteLine()", "MessageBox.Show()", "Alert()", "MsgBox()"], "correct": 1 },
+        { "topicIndex": 4, "question": "Какое свойство задает позицию элемента на форме?", "options": ["Position", "Coordinates", "Location", "Point"], "correct": 2 },
+        { "topicIndex": 4, "question": "Как задать случайную позицию кнопки?", "options": ["button1.Location = new Point(r.Next(100), r.Next(100));", "button1.Position = new Point(r.Next(100), r.Next(100));", "button1.Coordinates = r.Next(100);", "button1.SetLocation(r.Next(100));"], "correct": 0 },
+        { "topicIndex": 4, "question": "Как изменить цвет фона кнопки?", "options": ["button1.BackColor = Color.Red;", "button1.ForeColor = Color.Red;", "button1.Color = Color.Red;", "button1.Background = Color.Red;"], "correct": 0 },
+        { "topicIndex": 4, "question": "Какой класс используется для работы со случайными числами?", "options": ["Random", "Math", "Convert", "Color"], "correct": 0 },
+        { "topicIndex": 5, "question": "Какой элемент позволяет выбрать только один вариант из группы?", "options": ["CheckBox", "RadioButton", "GroupBox", "ListBox"], "correct": 1 },
+        { "topicIndex": 5, "question": "Для чего используется GroupBox?", "options": ["Для ввода текста", "Для группировки элементов интерфейса", "Для отображения изображений", "Для прокрутки"], "correct": 1 },
+        { "topicIndex": 5, "question": "Как проверить, выбран ли RadioButton?", "options": ["radioButton1.Selected", "radioButton1.Checked", "radioButton1.Value", "radioButton1.IsChecked"], "correct": 1 },
+        { "topicIndex": 5, "question": "Что произойдёт, если разместить несколько RadioButton без GroupBox?", "options": ["Они будут работать независимо", "Можно выбрать только один из всех", "Будет ошибка компиляции", "Они станут неактивными"], "correct": 1 },
+        { "topicIndex": 6, "question": "Какое свойство Panel отвечает за видимость рамки?", "options": ["FrameStyle", "BorderStyle", "Border", "BorderColor"], "correct": 1 },
+        { "topicIndex": 6, "question": "Какое событие возникает при перемещении ползунка TrackBar?", "options": ["ValueChanged", "Scroll", "Move", "Change"], "correct": 1 },
+        { "topicIndex": 6, "question": "Как увеличить значение ProgressBar на заданный шаг?", "options": ["progressBar1.Step++;", "progressBar1.PerformStep()", "progressBar1.Increment()", "progressBar1.Step += 1;"], "correct": 1 },
+        { "topicIndex": 6, "question": "Как получить текущую выбранную вкладку TabControl?", "options": ["tabControl1.CurrentTab", "tabControl1.SelectedTab", "tabControl1.ActiveTab", "tabControl1.Tab"], "correct": 1 },
+        { "topicIndex": 7, "question": "Как загрузить изображение из файла в PictureBox?", "options": ["pictureBox1.Image = Image.FromFile('path');", "pictureBox1.Load('path');", "pictureBox1.Source = 'path';", "Image.Load(pictureBox1, 'path');"], "correct": 0 },
+        { "topicIndex": 7, "question": "Какой режим масштабирования сохраняет пропорции изображения в PictureBox?", "options": ["Normal", "StretchImage", "Zoom", "CenterImage"], "correct": 2 },
+        { "topicIndex": 7, "question": "Как встроить изображение в .exe через ресурсы?", "options": ["Добавить в папку с проектом", "Импортировать в ресурсы и использовать Properties.Resources.Имя", "Сохранить в специальной папке", "Скомпилировать с ключом /res"], "correct": 1 },
+        { "topicIndex": 7, "question": "Какое свойство элемента позволяет установить фоновое изображение?", "options": ["Image", "BackgroundImage", "BackImage", "Picture"], "correct": 1 }
     ]
 }
