@@ -31,7 +31,6 @@ document.getElementById('toggleQuizSettingsBtn').addEventListener('click', funct
     const settingsPanel = document.getElementById('quizSettingsPanel');
     const testArea = document.getElementById('quizTestArea');
     
-    // Переключаем видимость панели настроек и области теста
     settingsPanel.classList.toggle('hidden');
     testArea.classList.toggle('hidden');
 });
@@ -46,7 +45,6 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
         return;
     }
 
-    // Скрываем панель настроек, показываем область теста
     document.getElementById('quizSettingsPanel').classList.add('hidden');
     document.getElementById('quizTestArea').classList.remove('hidden');
 
@@ -59,10 +57,8 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
 // ------------------ Обычный режим (radio) ------------------
 function startRadioQuiz(selectedIndices) {
-    // Показываем кнопку "Проверить"
     document.getElementById('quizCheckBtn').style.display = 'inline-block';
 
-    // Очищаем данные блочного режима
     clearMatchData();
 
     const questionsByTopic = {};
@@ -70,7 +66,6 @@ function startRadioQuiz(selectedIndices) {
         questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
     });
 
-    // Для каждой темы случайно выбираем один вопрос
     const selectedQuestions = [];
     selectedIndices.forEach(idx => {
         const topicQuestions = questionsByTopic[idx];
@@ -131,7 +126,6 @@ function renderRadioQuiz(questions) {
         container.appendChild(questionDiv);
     });
 
-    // Подсветка синтаксиса
     document.querySelectorAll('#quizContainer code').forEach(block => {
         const code = block.textContent;
         const result = hljs.highlight('c#', code);
@@ -183,14 +177,11 @@ function checkRadioQuiz() {
 
 // ------------------ Блочный режим (match) ------------------
 function startMatchQuiz(selectedIndices) {
-    // Скрываем кнопку "Проверить"
     document.getElementById('quizCheckBtn').style.display = 'none';
 
-    // Очищаем данные радио-режима
     document.getElementById("quizContainer").innerHTML = "";
     currentQuestions = [];
 
-    // Генерируем данные для блочного режима с 2-3 вариантами на вопрос
     const { questions, answers } = generateMatchData(selectedIndices);
     matchQuestions = questions;
     matchAnswers = answers;
@@ -214,12 +205,10 @@ function generateMatchData(selectedIndices) {
     const answers = [];
     const questionsByTopic = {};
 
-    // Собираем вопросы по темам
     selectedIndices.forEach(idx => {
         questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
     });
 
-    // Если выбрана одна тема, берём 3 случайных вопроса, иначе по одному из каждой
     let selectedQuestions = [];
     if (selectedIndices.length === 1) {
         const topicIdx = selectedIndices[0];
@@ -240,7 +229,6 @@ function generateMatchData(selectedIndices) {
 
     if (selectedQuestions.length === 0) return { questions: [], answers: [] };
 
-    // Для каждого вопроса выбираем правильный ответ + 1-2 случайных неправильных
     selectedQuestions.forEach((q, idx) => {
         const qId = `q_${idx}_${Math.random()}`;
         questions.push({
@@ -248,7 +236,6 @@ function generateMatchData(selectedIndices) {
             text: q.question,
         });
 
-        // Правильный ответ
         const correctAnswer = {
             aId: `a_${idx}_correct_${Math.random()}`,
             text: q.options[q.correct],
@@ -257,10 +244,8 @@ function generateMatchData(selectedIndices) {
         };
         answers.push(correctAnswer);
 
-        // Неправильные ответы (исключаем правильный)
         const incorrectOptions = q.options.filter((_, optIdx) => optIdx !== q.correct);
-        // Случайно выбираем 1 или 2 из них
-        const numIncorrect = Math.random() < 0.5 ? 1 : 2; // 50% на 1, 50% на 2
+        const numIncorrect = Math.random() < 0.5 ? 1 : 2;
         const shuffledIncorrect = [...incorrectOptions].sort(() => Math.random() - 0.5);
         const selectedIncorrect = shuffledIncorrect.slice(0, numIncorrect);
 
@@ -274,7 +259,6 @@ function generateMatchData(selectedIndices) {
         });
     });
 
-    // Перемешиваем ответы
     const shuffledAnswers = [...answers].sort(() => Math.random() - 0.5);
     return { questions, answers: shuffledAnswers };
 }
@@ -331,17 +315,14 @@ function onMatchBlockClick(e) {
         return;
     }
 
-    // Пытаемся соединить вопрос и ответ
     if (selected.type !== type) {
         const questionBlock = selected.type === 'question' ? selected.element : block;
         const answerBlock = selected.type === 'answer' ? selected.element : block;
         const questionId = questionBlock.dataset.id;
         const answerId = answerBlock.dataset.id;
 
-        // Находим соответствующий ответ в данных
         const answer = matchAnswers.find(a => a.aId === answerId);
         if (answer && answer.questionId === questionId && answer.isCorrect) {
-            // Правильное соединение
             matchState.pairs.push({ qId: questionId, aId: answerId });
             questionBlock.classList.add('matched');
             answerBlock.classList.add('matched');
@@ -349,13 +330,11 @@ function onMatchBlockClick(e) {
             matchState.selected = null;
             drawMatchLines();
         } else {
-            // Неправильное соединение
             drawTempLine(questionBlock, answerBlock, 'red');
             clearSelected();
             matchState.selected = null;
         }
     } else {
-        // Оба элемента одного типа - просто переключаем выделение
         clearSelected();
         block.classList.add('selected');
         matchState.selected = { type, id, element: block };
@@ -441,7 +420,6 @@ document.getElementById("quizResetBtn").addEventListener("click", function() {
     }
     document.getElementById("quizControls").style.display = "none";
     
-    // Возвращаем панель настроек и скрываем область теста
     document.getElementById('quizSettingsPanel').classList.remove('hidden');
     document.getElementById('quizTestArea').classList.add('hidden');
 });
