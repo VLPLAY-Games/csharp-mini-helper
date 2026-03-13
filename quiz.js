@@ -26,9 +26,11 @@ document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
 
 // Кнопка сворачивания/разворачивания настроек теста
 document.getElementById('toggleQuizSettingsBtn').addEventListener('click', function() {
-    const settings = document.getElementById('quizTopicSelector');
+    const settingsPanel = document.getElementById('quizSettingsPanel');
     const testArea = document.getElementById('quizTestArea');
-    settings.classList.toggle('hidden');
+    
+    // Переключаем видимость панели настроек и области теста
+    settingsPanel.classList.toggle('hidden');
     testArea.classList.toggle('hidden');
 });
 
@@ -42,6 +44,10 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
         return;
     }
 
+    // Скрываем панель настроек, показываем область теста
+    document.getElementById('quizSettingsPanel').classList.add('hidden');
+    document.getElementById('quizTestArea').classList.remove('hidden');
+
     if (currentMode === 'radio') {
         startRadioQuiz(selectedIndices);
     } else {
@@ -51,10 +57,6 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
 // ------------------ Обычный режим (radio) ------------------
 function startRadioQuiz(selectedIndices) {
-    // Скрываем настройки, показываем область теста
-    document.getElementById('quizTopicSelector').classList.add('hidden');
-    document.getElementById('quizTestArea').classList.remove('hidden');
-
     // Очищаем данные блочного режима, чтобы не мешали
     document.getElementById('matchQuestions').innerHTML = '';
     document.getElementById('matchAnswers').innerHTML = '';
@@ -183,10 +185,6 @@ function checkRadioQuiz() {
 
 // ------------------ Блочный режим (match) ------------------
 function startMatchQuiz(selectedIndices) {
-    // Скрываем настройки, показываем область теста
-    document.getElementById('quizTopicSelector').classList.add('hidden');
-    document.getElementById('quizTestArea').classList.remove('hidden');
-
     // Очищаем данные радио-режима
     document.getElementById("quizContainer").innerHTML = "";
     currentQuestions = [];
@@ -405,4 +403,8 @@ document.getElementById("quizResetBtn").addEventListener("click", function() {
         }
     }
     document.getElementById("quizControls").style.display = "none";
+    
+    // Возвращаем панель настроек и скрываем область теста
+    document.getElementById('quizSettingsPanel').classList.remove('hidden');
+    document.getElementById('quizTestArea').classList.add('hidden');
 });

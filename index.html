@@ -38,23 +38,25 @@
                     <button id="toggleQuizSettingsBtn" class="settings-btn" title="Настройки теста">⚙️</button>
                 </div>
                 
-                <div class="quiz-mode-selector">
-                    <label>
-                        <input type="radio" name="quizMode" value="radio" checked> Обычный (выбор варианта)
-                    </label>
-                    <label>
-                        <input type="radio" name="quizMode" value="match"> Блочный (соедини вопрос-ответ)
-                    </label>
-                </div>
-
-                <div id="quizTopicSelector">
-                    <p>Выберите темы для теста:</p>
-                    <div id="quizTopicsList" class="quiz-topics-list"></div>
-                    <div class="quiz-topic-buttons">
-                        <button id="quizSelectAllBtn">Выбрать все</button>
-                        <button id="quizDeselectAllBtn">Сбросить все</button>
+                <div id="quizSettingsPanel">
+                    <div id="quizModeSelector" class="quiz-mode-selector">
+                        <label>
+                            <input type="radio" name="quizMode" value="radio" checked> Обычный (выбор варианта)
+                        </label>
+                        <label>
+                            <input type="radio" name="quizMode" value="match"> Блочный (соедини вопрос-ответ)
+                        </label>
                     </div>
-                    <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
+
+                    <div id="quizTopicSelector">
+                        <p>Выберите темы для теста:</p>
+                        <div id="quizTopicsList" class="quiz-topics-list"></div>
+                        <div class="quiz-topic-buttons">
+                            <button id="quizSelectAllBtn">Выбрать все</button>
+                            <button id="quizDeselectAllBtn">Сбросить все</button>
+                        </div>
+                        <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
+                    </div>
                 </div>
 
                 <div id="quizTestArea" class="hidden">
