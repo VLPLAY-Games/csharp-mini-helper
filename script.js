@@ -1,6 +1,7 @@
 let topics = [];
 let currentTopic = null;
 let isMenuAnimating = false;
+let currentMenuIsTopic = false; // false - список тем, true - оглавление темы
 
 fetch("db/topics.json")
     .then(r => r.json())
@@ -26,6 +27,7 @@ function switchMenu(renderFunc, ...args) {
 
 // Отображение главного меню (список тем)
 function renderMenu(list, activeTitle) {
+    currentMenuIsTopic = false;
     const menu = document.getElementById("menu");
     menu.innerHTML = "";
 
@@ -45,6 +47,7 @@ function renderMenu(list, activeTitle) {
 
 // Отображение меню текущей темы (оглавление)
 function renderTopicMenu(topic) {
+    currentMenuIsTopic = true;
     const menu = document.getElementById("menu");
     menu.innerHTML = "";
 
@@ -142,12 +145,16 @@ function showMainScreen() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
-    document.getElementById("info").style.display = "none";   // <-- скрываем блок важного/ошибок/советов
+    document.getElementById("info").style.display = "none";   // скрываем блок важного/ошибок/советов
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
-    if (currentTopic) {
+    
+    // Если текущее меню — оглавление темы, переключаем на список тем
+    if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, null);
     }
+    // Иначе ничего не делаем, меню уже список тем
+    
     updateBreadcrumbs(['Главная']);
 }
 
@@ -330,10 +337,11 @@ function showMainMenu() {
     }
     document.getElementById("backToTopics").style.display = "none";
 
-    // Переключаем меню на список тем, сохраняя подсветку активной темы
-    switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
-
-    // НЕ вызываем showMainScreen, чтобы не скрывать контент темы
+    // Если текущее меню — оглавление темы, переключаем на список тем
+    if (currentMenuIsTopic) {
+        switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
+    }
+    // Иначе ничего не делаем, меню уже список тем
 }
 
 // Обработчики событий
@@ -400,9 +408,13 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     document.getElementById("info").style.display = "none";   // скрываем info в тесте
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
-    if (currentTopic) {
+    
+    // Если текущее меню — оглавление темы, переключаем на список тем
+    if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, null);
     }
+    // Иначе ничего не делаем, меню уже список тем
+    
     updateBreadcrumbs(['Главная', 'Тест']);
 });
 
