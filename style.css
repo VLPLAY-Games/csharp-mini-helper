@@ -664,3 +664,121 @@ button:hover {
     background: transparent;
     color: #2f5fe0;
 }
+
+.print-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 25px;
+    z-index: 2000;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+.print-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.print-panel-header h3 {
+    margin: 0;
+    color: #1e1e2f;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0 8px;
+}
+.close-btn:hover {
+    color: #000;
+    background: transparent;
+}
+
+.print-topics-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f0f2f8;
+    border-radius: 8px;
+}
+
+.print-topic-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+.print-topic-item:hover {
+    background: #e9ecef;
+}
+.print-topic-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.print-topic-item label {
+    cursor: pointer;
+    flex: 1;
+    word-break: break-word;
+}
+
+.print-panel-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+.print-panel-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#printSelectAllBtn, #printDeselectAllBtn {
+    background: #6c757d;
+    color: white;
+}
+#printSelectAllBtn:hover, #printDeselectAllBtn:hover {
+    background: #5a6268;
+}
+.generate-print-btn {
+    background: #28a745;
+    color: white;
+}
+.generate-print-btn:hover {
+    background: #1e7e34;
+}
+
+@media (max-width: 768px) {
+    .print-panel {
+        width: 95%;
+        padding: 15px;
+    }
+    .print-topics-list {
+        grid-template-columns: 1fr;
+    }
+}

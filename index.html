@@ -39,6 +39,20 @@
                 </div>
             </div>
 
+            <!-- Панель выбора тем для печати (скрыта по умолчанию) -->
+            <div id="printPanel" class="print-panel hidden">
+                <div class="print-panel-header">
+                    <h3>Выберите темы для печати</h3>
+                    <button id="closePrintPanel" class="close-btn">✕</button>
+                </div>
+                <div id="printTopicsList" class="print-topics-list"></div>
+                <div class="print-panel-buttons">
+                    <button id="printSelectAllBtn">Выбрать все</button>
+                    <button id="printDeselectAllBtn">Сбросить все</button>
+                    <button id="generatePrintBtn" class="generate-print-btn">Создать PDF</button>
+                </div>
+            </div>
+
             <div id="quizScreen" class="hidden fadeIn">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <h2>Тест по C#</h2>

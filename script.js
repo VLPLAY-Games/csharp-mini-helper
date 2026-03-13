@@ -9,6 +9,7 @@ fetch("db/topics.json")
         topics = data.topics;
         renderMenu(topics, null);
         renderTopicCheckboxes();
+        renderPrintCheckboxes(); // Заполняем список для печати
         updateBreadcrumbs(['Главная']); // начальное состояние
     });
 
@@ -343,20 +344,25 @@ function showMainMenu() {
     // Иначе ничего не делаем, меню уже список тем
 }
 
-// Генерация печатной версии (PDF)
-function generatePrintVersion() {
+// Генерация печатной версии (PDF) для выбранных тем
+function generatePrintVersion(selectedIndices) {
     if (!topics || topics.length === 0) {
         alert("Данные ещё не загружены. Попробуйте позже.");
         return;
     }
 
-    // Собираем HTML-контент
+    if (selectedIndices.length === 0) {
+        alert("Выберите хотя бы одну тему.");
+        return;
+    }
+
+    // Собираем HTML-контент только для выбранных тем
     let contentHTML = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>C# Краткий учебник - Полная версия</title>
+            <title>C# Краткий учебник - Избранные темы</title>
             <style>
                 body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; line-height: 1.5; }
                 h1 { color: #1e1e2f; border-bottom: 2px solid #4a7cff; padding-bottom: 10px; }
@@ -378,10 +384,16 @@ function generatePrintVersion() {
             </style>
         </head>
         <body>
-            <h1>C# Краткий учебник - Полное руководство</h1>
+            <h1>C# Краткий учебник - Избранные темы</h1>
     `;
 
-    topics.forEach((topic, index) => {
+    // Сортируем выбранные индексы по порядку
+    selectedIndices.sort((a, b) => a - b);
+
+    selectedIndices.forEach(index => {
+        const topic = topics[index];
+        if (!topic) return;
+
         contentHTML += `<h2>${index}. ${topic.title}</h2>`;
 
         if (topic.theory) {
@@ -518,10 +530,33 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
 
 // Обработчик кнопки печатной версии
 document.getElementById("printVersionBtn").addEventListener("click", function() {
-    generatePrintVersion();
+    document.getElementById("printPanel").classList.remove("hidden");
 });
 
-// Функция для создания чекбоксов тем
+// Закрыть панель печати
+document.getElementById("closePrintPanel").addEventListener("click", function() {
+    document.getElementById("printPanel").classList.add("hidden");
+});
+
+// Выбрать все темы для печати
+document.getElementById("printSelectAllBtn").addEventListener("click", function() {
+    document.querySelectorAll('#printTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+});
+
+// Сбросить все темы для печати
+document.getElementById("printDeselectAllBtn").addEventListener("click", function() {
+    document.querySelectorAll('#printTopicsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+});
+
+// Создать PDF для выбранных тем
+document.getElementById("generatePrintBtn").addEventListener("click", function() {
+    const checkboxes = document.querySelectorAll('#printTopicsList input[type="checkbox"]:checked');
+    const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+    generatePrintVersion(selectedIndices);
+    document.getElementById("printPanel").classList.add("hidden"); // закрываем панель после генерации
+});
+
+// Функция для создания чекбоксов тем для теста
 function renderTopicCheckboxes() {
     const container = document.getElementById("quizTopicsList");
     if (!container) return;
@@ -545,7 +580,31 @@ function renderTopicCheckboxes() {
     });
 }
 
-// Обработчики для кнопок "Выбрать все" и "Сбросить"
+// Функция для создания чекбоксов тем для печати
+function renderPrintCheckboxes() {
+    const container = document.getElementById("printTopicsList");
+    if (!container) return;
+    container.innerHTML = "";
+    topics.forEach((topic, index) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "print-topic-item";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `print_topic_${index}`;
+        checkbox.value = index;
+
+        const label = document.createElement("label");
+        label.htmlFor = `print_topic_${index}`;
+        label.textContent = `${index}. ${topic.title}`;
+
+        itemDiv.appendChild(checkbox);
+        itemDiv.appendChild(label);
+        container.appendChild(itemDiv);
+    });
+}
+
+// Обработчики для кнопок "Выбрать все" и "Сбросить" в тесте
 document.getElementById("quizSelectAllBtn").addEventListener("click", function() {
     document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
 });
