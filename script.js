@@ -601,3 +601,12 @@ document.getElementById("quizSelectAllBtn").addEventListener("click", function()
 document.getElementById("quizDeselectAllBtn").addEventListener("click", function() {
     document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = false);
 });
+
+// Регистрация Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('Service Worker зарегистрирован:', reg))
+      .catch(err => console.log('Ошибка регистрации Service Worker:', err));
+  });
+}
