@@ -497,6 +497,9 @@ document.addEventListener("DOMContentLoaded", function() {
         currentTopicTitle.style.display = "none";
     }
     document.getElementById("info").style.display = "none";
+
+    // Инициализация темы
+    initTheme();
 });
 
 // Обработчик кнопки перехода к тесту
@@ -609,4 +612,24 @@ if ('serviceWorker' in navigator) {
       .then(reg => console.log('Service Worker зарегистрирован:', reg))
       .catch(err => console.log('Ошибка регистрации Service Worker:', err));
   });
+}
+
+// ================== Тёмная тема ==================
+function initTheme() {
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        themeToggle.textContent = '☀️';
+    } else {
+        themeToggle.textContent = '🌙';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
+    });
 }

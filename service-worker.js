@@ -1,6 +1,6 @@
 // service-worker.js
 
-const CACHE_NAME = 'csharp-tutorial-v0.9';
+const CACHE_NAME = 'csharp-tutorial-v0.9.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -32,7 +32,7 @@ self.addEventListener('activate', event => {
           return caches.delete(key);
         }
       }))
-    )
+    ).then(() => self.clients.claim())
   );
 });
 
