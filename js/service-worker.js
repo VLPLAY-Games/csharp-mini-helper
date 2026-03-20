@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csharp-tutorial-v0.9.8';
+const CACHE_NAME = 'csharp-tutorial-v0.9.9';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -14,6 +14,7 @@ const urlsToCache = [
   '/js/quiz.js',
   '/lib/highlight.min.js',
   '/lib/github-dark.min.css',
+  "/lib/vis-network.min.js",
   '/db/topics.json',
   '/db/quiz.json',
   '/db/glossary.json',
