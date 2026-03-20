@@ -1,6 +1,6 @@
 // service-worker.js
 
-const CACHE_NAME = 'csharp-tutorial-v0.9.5';
+const CACHE_NAME = 'csharp-tutorial-v0.9.6';
 const urlsToCache = [
   '/',
   '/index.html',
