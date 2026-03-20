@@ -213,6 +213,33 @@ function loadTopic(topic) {
                 block.appendChild(descDiv);
             }
 
+            // Добавление скриншотов примера, если есть (поддержка объектов с src, width, alt)
+            if (ex.screens && ex.screens.length > 0) {
+                const screensDiv = document.createElement("div");
+                screensDiv.className = "example-screens";
+                ex.screens.forEach(screen => {
+                    let src, width, alt;
+                    if (typeof screen === 'string') {
+                        src = screen;
+                        width = null;
+                        alt = '';
+                    } else {
+                        src = screen.src;
+                        width = screen.width || null;
+                        alt = screen.alt || '';
+                    }
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = alt;
+                    img.className = "example-screen";
+                    if (width) {
+                        img.style.width = width + 'px';
+                    }
+                    screensDiv.appendChild(img);
+                });
+                block.appendChild(screensDiv);
+            }
+
             if (ex.codes && Array.isArray(ex.codes)) {
                 const columnsDiv = document.createElement("div");
                 columnsDiv.className = "example-columns";
@@ -366,10 +393,12 @@ function generatePrintVersion(selectedIndices) {
                 .important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
                 .error { background: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
                 .tip { background: #d1ecf1; padding: 10px; border-left: 4px solid #17a2b8; margin: 15px 0; }
-                .screen { max-width: 100%; margin: 10px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+                .screen, .example-screen { max-width: 100%; margin: 10px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: auto; }
                 .exampleBlock { margin-bottom: 35px; }
                 .example-columns { display: flex; gap: 20px; flex-wrap: wrap; }
                 .example-column { flex: 1 1 250px; min-width: 0; }
+                .example-screens { display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0; align-items: flex-start; }
+                .example-screen { border: 1px solid #ddd; }
                 @media print {
                     body { margin: 0.5in; }
                     pre { background: #f5f5f5; color: #000; border: 1px solid #ccc; }
@@ -404,6 +433,26 @@ function generatePrintVersion(selectedIndices) {
                 contentHTML += `<div class="exampleBlock">`;
                 contentHTML += `<h4>${ex.name}</h4>`;
                 if (ex.description) contentHTML += `<div>${ex.description}</div>`;
+
+                // Добавляем скриншоты примера в печатную версию (поддержка объектов)
+                if (ex.screens && ex.screens.length > 0) {
+                    contentHTML += `<div class="example-screens">`;
+                    ex.screens.forEach(screen => {
+                        let src, width, alt;
+                        if (typeof screen === 'string') {
+                            src = screen;
+                            width = null;
+                            alt = '';
+                        } else {
+                            src = screen.src;
+                            width = screen.width || null;
+                            alt = screen.alt || '';
+                        }
+                        let styleAttr = width ? ` style="width: ${width}px;"` : '';
+                        contentHTML += `<img src="${src}" alt="${alt}" class="example-screen"${styleAttr}>`;
+                    });
+                    contentHTML += `</div>`;
+                }
 
                 if (ex.codes && Array.isArray(ex.codes)) {
                     contentHTML += `<div class="example-columns">`;
