@@ -593,47 +593,121 @@ function showKnowledgeGraph() {
 function renderGraph() {
     const container = document.getElementById("graphScreen");
     container.innerHTML = '<div id="knowledgeGraph" style="width: 100%; height: 100%;"></div>';
+
+    // Получаем актуальные цвета из CSS-переменных
+    const style = getComputedStyle(document.body);
+    const textColor = style.getPropertyValue('--text-dark').trim() || '#333333';
+    const bgColor = style.getPropertyValue('--bg-card').trim() || '#ffffff';
+    const borderColor = style.getPropertyValue('--accent-primary').trim() || '#4a7cff';
+    const highlightBg = style.getPropertyValue('--accent-primary').trim() || '#4a7cff';
+
     const nodes = [];
     const edges = [];
+
     topics.forEach((topic, idx) => {
         nodes.push({
             id: idx,
             label: topic.title,
             title: topic.title,
-            group: idx
+            group: idx,
+            font: { size: 14, color: textColor },
+            color: {
+                background: bgColor,
+                border: borderColor,
+                highlight: { background: highlightBg, border: borderColor }
+            },
+            shape: 'box',
+            margin: 12,
+            widthConstraint: { minimum: 100, maximum: 200 },
+            mass: 2,          // увеличиваем массу для стабильности
+            physics: true
         });
+
         if (topic.prerequisites) {
             topic.prerequisites.forEach(prereqIdx => {
                 edges.push({
                     from: prereqIdx,
                     to: idx,
-                    arrows: 'to'
+                    arrows: 'to',
+                    color: { color: borderColor },
+                    width: 2,
+                    smooth: { type: 'continuous' }
                 });
             });
         }
     });
+
     const data = {
         nodes: new vis.DataSet(nodes),
         edges: new vis.DataSet(edges)
     };
+
     const options = {
         nodes: {
             shape: 'box',
-            font: { size: 14, color: 'var(--text-dark)' },
-            color: { background: 'var(--bg-card)', border: 'var(--accent-primary)', highlight: { background: 'var(--accent-primary)' } }
+            font: { size: 14, color: textColor },
+            color: { background: bgColor, border: borderColor },
+            margin: 12,
+            widthConstraint: { minimum: 100, maximum: 200 }
         },
         edges: {
-            color: 'var(--accent-primary)',
+            color: { color: borderColor },
             width: 2,
             smooth: { type: 'continuous' }
         },
         physics: {
-            stabilization: true,
-            solver: 'forceAtlas2Based'
+            stabilization: {
+                iterations: 300,
+                updateInterval: 50,
+                onlyDynamicEdges: false,
+                fit: true
+            },
+            solver: 'forceAtlas2Based',
+            forceAtlas2Based: {
+                gravitationalConstant: -50,
+                centralGravity: 0.005,
+                springLength: 350,
+                springConstant: 0.1,
+                damping: 0.9,
+                avoidOverlap: 0.5
+            },
+            maxVelocity: 6,
+            minVelocity: 0.05,
+            timestep: 0.2
         },
-        interaction: { hover: true, navigationButtons: true }
+        layout: {
+            improvedLayout: true,
+            randomSeed: 1
+        },
+        interaction: {
+            hover: true,
+            navigationButtons: true,
+            dragNodes: true,
+            zoomView: true,
+            tooltipDelay: 300,
+            dragView: true,
+            zoomSpeed: 0.8,
+            navigation: {
+                enabled: true,
+                keyboard: {
+                    enabled: true,
+                    speed: { x: 1, y: 1, zoom: 0.8 }
+                }
+            }
+        }
     };
+
+
+    if (graphNetwork) {
+        graphNetwork.destroy();
+    }
     graphNetwork = new vis.Network(document.getElementById("knowledgeGraph"), data, options);
+
+    // После стабилизации подгоняем масштаб
+    graphNetwork.once('stabilizationIterationsDone', function () {
+        graphNetwork.fit();
+    });
+
     graphNetwork.on("click", function(params) {
         if (params.nodes.length > 0) {
             const topicId = params.nodes[0];
@@ -641,6 +715,7 @@ function renderGraph() {
         }
     });
 }
+
 
 // ================== ПЕЧАТНАЯ ВЕРСИЯ ==================
 function generatePrintVersion(selectedIndices, options) {

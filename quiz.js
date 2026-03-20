@@ -1,5 +1,4 @@
 // quiz.js
-let quizData = [];          // все вопросы из quiz.json
 let currentMode = 'radio';   // 'radio', 'checkbox' или 'match'
 let currentQuestions = [];   // текущие вопросы (для radio/checkbox)
 let matchQuestions = [];     // данные для блочного режима: массив вопросов { qId, text }
@@ -8,19 +7,6 @@ let matchState = {
     selected: null,          // { type: 'question', id } или { type: 'answer', id } или null
     pairs: [],               // [{ qId, aId }] успешные пары
 };
-
-// Загружаем вопросы при старте
-fetch("db/quiz.json")
-    .then(r => r.json())
-    .then(data => {
-        // Преобразуем старый формат correct (число) в массив для единообразия
-        quizData = data.questions.map(q => {
-            if (!Array.isArray(q.correct)) {
-                q.correct = [q.correct];
-            }
-            return q;
-        });
-    });
 
 // Переключение режима
 document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
