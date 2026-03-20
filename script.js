@@ -4,6 +4,7 @@ let isMenuAnimating = false;
 let currentMenuIsTopic = false;
 let quizData = [];
 let glossary = [];
+let graphPhysicsEnabled = true;
 
 // Загрузка данных
 Promise.all([
@@ -490,7 +491,6 @@ function displaySearchResults(results) {
             div.innerHTML = `<strong>📖 Глоссарий: ${res.term}</strong><br><small>${res.definition.substring(0, 100)}...</small>`;
             div.onclick = () => {
                 showGlossary();
-                // Прокрутить к термину
                 setTimeout(() => {
                     const termElem = document.getElementById(`glossary-${res.term.replace(/\s/g, '-')}`);
                     if (termElem) termElem.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -588,13 +588,71 @@ function showKnowledgeGraph() {
     }
     updateBreadcrumbs(['Главная', 'Граф знаний']);
     renderGraph();
+    addGraphControls();
 }
+
+function addGraphControls() {
+    const graphScreen = document.getElementById("graphScreen");
+    let controlsPanel = graphScreen.querySelector('.graph-controls-panel');
+    if (controlsPanel) controlsPanel.remove();
+
+    controlsPanel = document.createElement('div');
+    controlsPanel.className = 'graph-controls-panel';
+    controlsPanel.style.position = 'absolute';
+    controlsPanel.style.bottom = '20px';
+    controlsPanel.style.right = '20px';
+    controlsPanel.style.display = 'flex';
+    controlsPanel.style.gap = '10px';
+    controlsPanel.style.zIndex = '100';
+    graphScreen.style.position = 'relative';
+    graphScreen.appendChild(controlsPanel);
+
+    // Кнопка сброса позиций
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Сбросить позиции';
+    resetBtn.style.padding = '8px 16px';
+    resetBtn.style.borderRadius = '20px';
+    resetBtn.style.background = 'var(--accent-primary)';
+    resetBtn.style.color = 'white';
+    resetBtn.style.border = 'none';
+    resetBtn.style.cursor = 'pointer';
+    resetBtn.onclick = () => {
+        if (graphNetwork) {
+            graphNetwork.setData(graphNetwork.body.data);
+            graphNetwork.fit();
+        }
+    };
+    controlsPanel.appendChild(resetBtn);
+
+    // Кнопка фиксации узлов
+    const togglePhysicsBtn = document.createElement('button');
+    togglePhysicsBtn.textContent = graphPhysicsEnabled ? 'Зафиксировать узлы' : 'Возобновить движение';
+    togglePhysicsBtn.style.padding = '8px 16px';
+    togglePhysicsBtn.style.borderRadius = '20px';
+    togglePhysicsBtn.style.background = 'var(--accent-primary)';
+    togglePhysicsBtn.style.color = 'white';
+    togglePhysicsBtn.style.border = 'none';
+    togglePhysicsBtn.style.cursor = 'pointer';
+    togglePhysicsBtn.onclick = () => {
+        if (graphNetwork) {
+            graphPhysicsEnabled = !graphPhysicsEnabled;
+            graphNetwork.setOptions({ physics: graphPhysicsEnabled });
+            togglePhysicsBtn.textContent = graphPhysicsEnabled ? 'Зафиксировать узлы' : 'Возобновить движение';
+            if (graphPhysicsEnabled) {
+                graphNetwork.startSimulation();
+            } else {
+                graphNetwork.stopSimulation();
+            }
+        }
+    };
+    controlsPanel.appendChild(togglePhysicsBtn);
+}
+
 
 function renderGraph() {
     const container = document.getElementById("graphScreen");
     container.innerHTML = '<div id="knowledgeGraph" style="width: 100%; height: 100%;"></div>';
 
-    // Получаем актуальные цвета из CSS-переменных
     const style = getComputedStyle(document.body);
     const textColor = style.getPropertyValue('--text-dark').trim() || '#333333';
     const bgColor = style.getPropertyValue('--bg-card').trim() || '#ffffff';
@@ -619,7 +677,7 @@ function renderGraph() {
             shape: 'box',
             margin: 12,
             widthConstraint: { minimum: 100, maximum: 200 },
-            mass: 2,          // увеличиваем массу для стабильности
+            mass: 2,
             physics: true
         });
 
@@ -702,12 +760,17 @@ function renderGraph() {
         graphNetwork.destroy();
     }
     graphNetwork = new vis.Network(document.getElementById("knowledgeGraph"), data, options);
-
-    // После стабилизации подгоняем масштаб
+    
+    // Устанавливаем физику в соответствии с сохранённым состоянием
+    graphNetwork.setOptions({ physics: graphPhysicsEnabled });
+    if (!graphPhysicsEnabled) {
+        graphNetwork.stopSimulation();
+    }
+    
     graphNetwork.once('stabilizationIterationsDone', function () {
         graphNetwork.fit();
     });
-
+    
     graphNetwork.on("click", function(params) {
         if (params.nodes.length > 0) {
             const topicId = params.nodes[0];
@@ -1005,8 +1068,12 @@ function initTheme() {
         const isDark = document.body.classList.contains('dark-theme');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         themeToggle.textContent = isDark ? '☀️' : '🌙';
-        // Обновить граф, если открыт
-        if (graphNetwork) {
+        
+        // Обновить граф, если он открыт
+        if (graphNetwork && !document.getElementById("graphScreen").classList.contains("hidden")) {
+            renderGraph();
+            addGraphControls();
+        } else if (graphNetwork) {
             renderGraph();
         }
     });
