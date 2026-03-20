@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>C# Краткий учебник</title>
     <link rel="icon" type="image/svg+xml" href="images/icon.svg">
-    <link rel="stylesheet" href="style.css?v=0.9.2">
+    <link rel="stylesheet" href="style.css?v=0.9.3">
     <link rel="stylesheet" href="lib/github-dark.min.css">
     <script src="lib/highlight.min.js"></script>
 </head>
@@ -25,7 +25,7 @@
                     <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему">🌙</button>
                 </div>
                 <p>Разработано VLPLAY Games</p>
-                <p>Версия 0.9.2</p>
+                <p>Версия 0.9.3</p>
             </div>
         </div>
 
@@ -129,7 +129,16 @@
             </div>
         </div>
     </div>
-    <script src="script.js?v=0.9.2"></script>
-    <script src="quiz.js?v=0.9.2"></script>
+    <div id="lightbox" class="lightbox hidden">
+        <div class="lightbox-overlay"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close">&times;</button>
+            <img class="lightbox-image" src="" alt="">
+            <div class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <script src="script.js?v=0.9.3"></script>
+    <script src="quiz.js?v=0.9.3"></script>
 </body>
 </html>

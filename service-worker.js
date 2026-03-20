@@ -1,6 +1,6 @@
 // service-worker.js
 
-const CACHE_NAME = 'csharp-tutorial-v0.9.2';
+const CACHE_NAME = 'csharp-tutorial-v0.9.3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,7 +11,14 @@ const urlsToCache = [
   '/lib/github-dark.min.css',
   '/db/topics.json',
   '/db/quiz.json',
-  '/images/icon.svg'
+  '/images/icon.svg',
+  '/screenshots/0/create_project_1.jpg',
+  '/screenshots/0/install_3.jpg',
+  '/screenshots/0/install_5.jpg',
+  '/screenshots/0/install_6.jpg',
+  '/screenshots/0/install_8.jpg',
+  '/screenshots/0/properties_1.jpg',
+  '/screenshots/0/run_program_1.jpg'
 ];
 
 // Установка Service Worker и кэширование всех файлов

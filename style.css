@@ -25,6 +25,8 @@
     --match-block-bg: white;
     --match-block-border: #4a7cff;
     --print-panel-bg: white;
+    --code-inline-bg: #f0f0f0;
+    --code-inline-text: #c7254e;
 }
 
 .dark-theme {
@@ -54,6 +56,8 @@
     --match-block-bg: #3a3a4a;
     --match-block-border: #6a9cff;
     --print-panel-bg: #2d2d3a;
+    --code-inline-bg: #2d2d2d;
+    --code-inline-text: #ff79c6;
 }
 
 body {
@@ -206,9 +210,12 @@ pre {
 }
 
 code {
-    white-space: pre;
+    background: var(--code-inline-bg);
+    color: var(--code-inline-text);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
     font-family: Consolas, monospace;
-    color: var(--code-text);
+    font-size: 0.9em;
 }
 
 button {
@@ -920,4 +927,80 @@ button:hover {
 .print-btn-div {
     position: absolute; 
     bottom: 50px;
+}
+
+/* ===== Lightbox ===== */
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0.3s, opacity 0.3s;
+}
+.lightbox.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+.lightbox-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    cursor: pointer;
+}
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 2002;
+    text-align: center;
+}
+.lightbox-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+}
+.lightbox-caption {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    word-break: break-word;
+}
+.lightbox-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--text-dark);
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.lightbox-close:hover {
+    color: var(--danger);
+    background: transparent;
+}
+
+img {
+    cursor: pointer;
 }

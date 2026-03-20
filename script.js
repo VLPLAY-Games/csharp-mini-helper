@@ -549,6 +549,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Инициализация темы
     initTheme();
+    // Инициализация lightbox
+    initLightbox();
 });
 
 // Обработчик кнопки перехода к тесту
@@ -680,5 +682,48 @@ function initTheme() {
         const isDark = document.body.classList.contains('dark-theme');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         themeToggle.textContent = isDark ? '☀️' : '🌙';
+    });
+}
+
+// ================== Lightbox ==================
+function initLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('.lightbox-image');
+    const lightboxCaption = lightbox.querySelector('.lightbox-caption');
+    const closeBtn = lightbox.querySelector('.lightbox-close');
+    const overlay = lightbox.querySelector('.lightbox-overlay');
+
+    function openLightbox(imgElement) {
+        const src = imgElement.getAttribute('src');
+        const alt = imgElement.getAttribute('alt') || '';
+        lightboxImg.src = src;
+        lightboxImg.alt = alt;
+        lightboxCaption.textContent = alt;
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // Делегирование событий для всех скриншотов (как общих, так и примеров)
+    document.body.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.matches('.screen, .example-screen')) {
+            e.preventDefault();
+            openLightbox(target);
+        }
+    });
+
+    closeBtn.addEventListener('click', closeLightbox);
+    overlay.addEventListener('click', closeLightbox);
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+            closeLightbox();
+        }
     });
 }
