@@ -626,12 +626,6 @@ button:hover {
 }
 
 .quiz-option code {
-    background: var(--code-bg);
-    color: var(--code-text);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: Consolas, monospace;
-    white-space: pre-wrap;
     flex: 1;
 }
 

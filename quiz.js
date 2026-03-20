@@ -1,6 +1,7 @@
+// quiz.js
 let quizData = [];          // все вопросы из quiz.json
-let currentMode = 'radio';   // 'radio' или 'match'
-let currentQuestions = [];   // текущие вопросы (для radio)
+let currentMode = 'radio';   // 'radio', 'checkbox' или 'match'
+let currentQuestions = [];   // текущие вопросы (для radio/checkbox)
 let matchQuestions = [];     // данные для блочного режима: массив вопросов { qId, text }
 let matchAnswers = [];       // данные для блочного режима: массив ответов { aId, text, questionId, isCorrect }
 let matchState = {
@@ -12,16 +13,22 @@ let matchState = {
 fetch("db/quiz.json")
     .then(r => r.json())
     .then(data => {
-        quizData = data.questions;
+        // Преобразуем старый формат correct (число) в массив для единообразия
+        quizData = data.questions.map(q => {
+            if (!Array.isArray(q.correct)) {
+                q.correct = [q.correct];
+            }
+            return q;
+        });
     });
 
 // Переключение режима
 document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         currentMode = e.target.value;
-        document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio');
+        document.getElementById('quizContainer').classList.toggle('hidden', currentMode !== 'radio' && currentMode !== 'checkbox');
         document.getElementById('matchContainer').classList.toggle('hidden', currentMode !== 'match');
-        document.getElementById('quizCheckBtn').style.display = currentMode === 'radio' ? 'inline-block' : 'none';
+        document.getElementById('quizCheckBtn').style.display = (currentMode === 'radio' || currentMode === 'checkbox') ? 'inline-block' : 'none';
         document.getElementById('quizResult').classList.add('hidden');
     });
 });
@@ -52,69 +59,138 @@ document.getElementById("quizStartBtn").addEventListener("click", function() {
 
     if (currentMode === 'radio') {
         startRadioQuiz(selectedIndices);
+    } else if (currentMode === 'checkbox') {
+        startCheckboxQuiz(selectedIndices);
     } else {
         startMatchQuiz(selectedIndices);
     }
 });
 
-// ------------------ Обычный режим (radio) ------------------
+// ------------------ Режим с одним вариантом (radio) ------------------
 function startRadioQuiz(selectedIndices) {
     document.getElementById('quizCheckBtn').style.display = 'inline-block';
-
     clearMatchData();
 
-    const questionsByTopic = {};
+    // Фильтруем вопросы: только с одним правильным ответом и из выбранных тем
+    let questionsByTopic = {};
     selectedIndices.forEach(idx => {
-        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx);
+        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx && q.correct.length === 1);
     });
 
-    const selectedQuestions = [];
-    selectedIndices.forEach(idx => {
-        const topicQuestions = questionsByTopic[idx];
-        if (topicQuestions.length > 0) {
-            const randomIndex = Math.floor(Math.random() * topicQuestions.length);
-            selectedQuestions.push(topicQuestions[randomIndex]);
-        }
-    });
-
-    if (selectedQuestions.length === 0) {
-        alert("В выбранных темах нет вопросов.");
+    // Проверяем, есть ли хоть какие-то вопросы
+    if (Object.values(questionsByTopic).every(arr => arr.length === 0)) {
+        alert("В выбранных темах нет вопросов с одним правильным ответом.");
         return;
     }
 
-    selectedQuestions.sort(() => Math.random() - 0.5);
-    renderRadioQuiz(selectedQuestions);
+    let selectedQuestions = [];
+
+    if (selectedIndices.length === 1) {
+        // Одна тема – берём 2 вопроса (или меньше, если их меньше 2)
+        const topicIdx = selectedIndices[0];
+        const topicQuestions = questionsByTopic[topicIdx];
+        const shuffled = shuffleArray([...topicQuestions]);
+        selectedQuestions = shuffled.slice(0, Math.min(2, shuffled.length));
+    } else {
+        // Несколько тем – из каждой по 2 вопроса
+        selectedIndices.forEach(idx => {
+            const topicQuestions = questionsByTopic[idx];
+            if (topicQuestions.length > 0) {
+                const shuffled = shuffleArray([...topicQuestions]);
+                const taken = shuffled.slice(0, Math.min(2, shuffled.length));
+                selectedQuestions.push(...taken);
+            }
+        });
+    }
+
+    if (selectedQuestions.length === 0) {
+        alert("Не удалось сформировать вопросы для выбранных тем.");
+        return;
+    }
+
+    renderQuiz(selectedQuestions, 'radio');
     document.getElementById("quizControls").style.display = "flex";
     document.getElementById('quizContainer').classList.remove('hidden');
     document.getElementById('matchContainer').classList.add('hidden');
 }
 
-// Подсветка конкретного вопроса (для radio)
-function highlightQuestion(questionDiv, selectedValue, correctValue) {
-    const options = questionDiv.querySelectorAll('.quiz-option');
-    options.forEach(opt => {
-        opt.classList.remove('correct-option', 'incorrect-option');
+// ------------------ Режим с несколькими вариантами (checkbox) ------------------
+function startCheckboxQuiz(selectedIndices) {
+    document.getElementById('quizCheckBtn').style.display = 'inline-block';
+    clearMatchData();
+
+    // Фильтруем вопросы: только с несколькими правильными ответами и из выбранных тем
+    let questionsByTopic = {};
+    selectedIndices.forEach(idx => {
+        questionsByTopic[idx] = quizData.filter(q => q.topicIndex === idx && q.correct.length > 1);
     });
-    if (selectedValue !== undefined) {
-        const selectedOption = options[selectedValue];
-        if (selectedValue === correctValue) {
-            selectedOption.classList.add('correct-option');
-        } else {
-            selectedOption.classList.add('incorrect-option');
-            options[correctValue].classList.add('correct-option');
-        }
+
+    // Проверяем, есть ли хоть какие-то вопросы
+    if (Object.values(questionsByTopic).every(arr => arr.length === 0)) {
+        alert("В выбранных темах нет вопросов с несколькими правильными ответами.");
+        return;
     }
+
+    let selectedQuestions = [];
+
+    if (selectedIndices.length === 1) {
+        // Одна тема – берём 2 вопроса (или меньше, если их меньше 2)
+        const topicIdx = selectedIndices[0];
+        const topicQuestions = questionsByTopic[topicIdx];
+        const shuffled = shuffleArray([...topicQuestions]);
+        selectedQuestions = shuffled.slice(0, Math.min(2, shuffled.length));
+    } else {
+        // Несколько тем – из каждой по 2 вопроса
+        selectedIndices.forEach(idx => {
+            const topicQuestions = questionsByTopic[idx];
+            if (topicQuestions.length > 0) {
+                const shuffled = shuffleArray([...topicQuestions]);
+                const taken = shuffled.slice(0, Math.min(2, shuffled.length));
+                selectedQuestions.push(...taken);
+            }
+        });
+    }
+
+    if (selectedQuestions.length === 0) {
+        alert("Не удалось сформировать вопросы для выбранных тем.");
+        return;
+    }
+
+    renderQuiz(selectedQuestions, 'checkbox');
+    document.getElementById("quizControls").style.display = "flex";
+    document.getElementById('quizContainer').classList.remove('hidden');
+    document.getElementById('matchContainer').classList.add('hidden');
 }
 
-function renderRadioQuiz(questions) {
+// Перемешивание массива (алгоритм Фишера-Йетса)
+function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// Рендеринг вопросов (radio или checkbox) с перемешиванием вариантов ответов
+function renderQuiz(questions, type) {
     const container = document.getElementById("quizContainer");
     container.innerHTML = "";
-    currentQuestions = questions;
+    currentQuestions = [];
 
     questions.forEach((q, idx) => {
+        // Сохраняем вопрос с его исходными данными
+        currentQuestions.push(q);
+
+        // Перемешиваем варианты ответов
+        const shuffledOptions = shuffleArray([...q.options]);
+        // Создаём маппинг: индекс в перемешанном массиве -> исходный индекс
+        const mapping = shuffledOptions.map(opt => q.options.indexOf(opt));
+
         const questionDiv = document.createElement("div");
         questionDiv.className = "quiz-question";
         questionDiv.dataset.questionIndex = idx;
+        // Сохраняем маппинг в dataset для проверки
+        questionDiv.dataset.mapping = JSON.stringify(mapping);
 
         const questionText = document.createElement("div");
         questionText.className = "quiz-question-text";
@@ -124,19 +200,19 @@ function renderRadioQuiz(questions) {
         const optionsDiv = document.createElement("div");
         optionsDiv.className = "quiz-options";
 
-        q.options.forEach((opt, optIdx) => {
+        shuffledOptions.forEach((opt, optIdx) => {
             const optionLabel = document.createElement("label");
             optionLabel.className = "quiz-option";
 
-            const radio = document.createElement("input");
-            radio.type = "radio";
-            radio.name = `q_${idx}`;
-            radio.value = optIdx;
+            const input = document.createElement("input");
+            input.type = type;
+            input.name = `q_${idx}`;
+            input.value = optIdx; // значение — индекс в перемешанном массиве
 
             const codeSpan = document.createElement("code");
             codeSpan.textContent = opt;
 
-            optionLabel.appendChild(radio);
+            optionLabel.appendChild(input);
             optionLabel.appendChild(codeSpan);
             optionsDiv.appendChild(optionLabel);
         });
@@ -144,48 +220,90 @@ function renderRadioQuiz(questions) {
         questionDiv.appendChild(optionsDiv);
         container.appendChild(questionDiv);
     });
-
-    document.querySelectorAll('#quizContainer code').forEach(block => {
-        const code = block.textContent;
-        const result = hljs.highlight('c#', code);
-        block.innerHTML = result.value;
-        block.classList.add('hljs');
-    });
 }
 
-// Проверка обычного теста
+// Проверка ответов (общая для radio и checkbox)
 document.getElementById("quizCheckBtn").addEventListener("click", function() {
     if (currentMode === 'radio') {
-        checkRadioQuiz();
+        checkQuiz('radio');
+    } else if (currentMode === 'checkbox') {
+        checkQuiz('checkbox');
     }
 });
 
-function checkRadioQuiz() {
+function checkQuiz(type) {
     if (!currentQuestions || currentQuestions.length === 0) return;
 
-    const questions = document.querySelectorAll("#quizContainer .quiz-question");
+    const questionsDivs = document.querySelectorAll("#quizContainer .quiz-question");
     let correctCount = 0;
 
-    questions.forEach((qDiv, idx) => {
-        const selectedRadio = qDiv.querySelector('input[type="radio"]:checked');
+    questionsDivs.forEach((qDiv, idx) => {
         const currentQ = currentQuestions[idx];
-        const correctValue = currentQ.correct;
+        const correctIndices = currentQ.correct; // массив исходных правильных индексов
+        const mapping = JSON.parse(qDiv.dataset.mapping); // mapping[shuffledIndex] = originalIndex
 
-        if (selectedRadio) {
-            const selectedValue = parseInt(selectedRadio.value, 10);
-            highlightQuestion(qDiv, selectedValue, correctValue);
-            if (selectedValue === correctValue) {
-                correctCount++;
+        if (type === 'radio') {
+            const selectedRadio = qDiv.querySelector('input[type="radio"]:checked');
+            if (selectedRadio) {
+                const selectedShuffledIdx = parseInt(selectedRadio.value, 10);
+                const selectedOriginalIdx = mapping[selectedShuffledIdx];
+                highlightRadioQuestion(qDiv, selectedShuffledIdx, correctIndices[0], mapping);
+                if (selectedOriginalIdx === correctIndices[0]) {
+                    correctCount++;
+                }
+            } else {
+                highlightRadioQuestion(qDiv, undefined, correctIndices[0], mapping);
             }
-        } else {
-            highlightQuestion(qDiv, undefined, correctValue);
+        } else { // checkbox
+            const selectedCheckboxes = Array.from(qDiv.querySelectorAll('input[type="checkbox"]:checked')).map(cb => parseInt(cb.value, 10));
+            const selectedOriginalIndices = selectedCheckboxes.map(shuffledIdx => mapping[shuffledIdx]);
+            highlightCheckboxQuestion(qDiv, selectedCheckboxes, correctIndices, mapping);
+            const isCorrect = selectedOriginalIndices.length === correctIndices.length &&
+                              selectedOriginalIndices.every(v => correctIndices.includes(v));
+            if (isCorrect) correctCount++;
         }
     });
 
-    // Отображаем результат в блоке
     const resultDiv = document.getElementById('quizResult');
-    resultDiv.innerHTML = `<span class="correct-count">${correctCount}</span> из <span class="total-count">${questions.length}</span> правильных ответов.`;
+    resultDiv.innerHTML = `<span class="correct-count">${correctCount}</span> из <span class="total-count">${questionsDivs.length}</span> правильных ответов.`;
     resultDiv.classList.remove('hidden');
+}
+
+// Подсветка для radio (с учётом перемешанных индексов)
+function highlightRadioQuestion(questionDiv, selectedShuffledIdx, correctOriginalIdx, mapping) {
+    const options = questionDiv.querySelectorAll('.quiz-option');
+    options.forEach(opt => opt.classList.remove('correct-option', 'incorrect-option'));
+
+    // Находим правильный перемешанный индекс
+    let correctShuffledIdx = mapping.findIndex(orig => orig === correctOriginalIdx);
+
+    if (selectedShuffledIdx !== undefined) {
+        const selectedOption = options[selectedShuffledIdx];
+        if (selectedShuffledIdx === correctShuffledIdx) {
+            selectedOption.classList.add('correct-option');
+        } else {
+            selectedOption.classList.add('incorrect-option');
+            options[correctShuffledIdx].classList.add('correct-option');
+        }
+    } else {
+        options[correctShuffledIdx].classList.add('correct-option');
+    }
+}
+
+// Подсветка для checkbox (с учётом перемешанных индексов)
+function highlightCheckboxQuestion(questionDiv, selectedShuffledIndices, correctOriginalIndices, mapping) {
+    const options = questionDiv.querySelectorAll('.quiz-option');
+    // Находим перемешанные индексы правильных ответов
+    const correctShuffledIndices = correctOriginalIndices.map(origIdx => mapping.findIndex(m => m === origIdx));
+
+    options.forEach((opt, idx) => {
+        opt.classList.remove('correct-option', 'incorrect-option');
+        if (correctShuffledIndices.includes(idx)) {
+            opt.classList.add('correct-option');
+        } else if (selectedShuffledIndices.includes(idx)) {
+            opt.classList.add('incorrect-option');
+        }
+    });
 }
 
 // ------------------ Блочный режим (match) ------------------
@@ -228,7 +346,7 @@ function generateMatchData(selectedIndices) {
         const topicIdx = selectedIndices[0];
         const topicQuestions = questionsByTopic[topicIdx];
         if (topicQuestions.length > 0) {
-            const shuffled = [...topicQuestions].sort(() => Math.random() - 0.5);
+            const shuffled = shuffleArray([...topicQuestions]);
             selectedQuestions = shuffled.slice(0, Math.min(3, shuffled.length));
         }
     } else {
@@ -250,17 +368,20 @@ function generateMatchData(selectedIndices) {
             text: q.question,
         });
 
+        // Берём первый правильный ответ для сопоставления
+        const correctAnswerIndex = q.correct[0];
+        const correctAnswerText = q.options[correctAnswerIndex];
         const correctAnswer = {
             aId: `a_${idx}_correct_${Math.random()}`,
-            text: q.options[q.correct],
+            text: correctAnswerText,
             questionId: qId,
             isCorrect: true,
         };
         answers.push(correctAnswer);
 
-        const incorrectOptions = q.options.filter((_, optIdx) => optIdx !== q.correct);
+        const incorrectOptions = q.options.filter((_, optIdx) => !q.correct.includes(optIdx));
         const numIncorrect = Math.random() < 0.5 ? 1 : 2;
-        const shuffledIncorrect = [...incorrectOptions].sort(() => Math.random() - 0.5);
+        const shuffledIncorrect = shuffleArray([...incorrectOptions]);
         const selectedIncorrect = shuffledIncorrect.slice(0, numIncorrect);
 
         selectedIncorrect.forEach((opt, i) => {
@@ -273,7 +394,7 @@ function generateMatchData(selectedIndices) {
         });
     });
 
-    const shuffledAnswers = [...answers].sort(() => Math.random() - 0.5);
+    const shuffledAnswers = shuffleArray([...answers]);
     return { questions, answers: shuffledAnswers };
 }
 
@@ -426,7 +547,7 @@ function clearMatchData() {
 
 // Сброс теста (общий для обоих режимов)
 document.getElementById("quizResetBtn").addEventListener("click", function() {
-    if (currentMode === 'radio') {
+    if (currentMode === 'radio' || currentMode === 'checkbox') {
         document.getElementById("quizContainer").innerHTML = "";
         currentQuestions = [];
     } else {
