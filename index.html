@@ -4,34 +4,37 @@
     <meta charset="UTF-8">
     <title>C# Краткий учебник</title>
     <link rel="icon" type="image/svg+xml" href="images/icon.svg">
-    <link rel="stylesheet" href="style.css?v=0.9.6">
+    <link rel="stylesheet" href="style.css?v=0.9.7">
     <link rel="stylesheet" href="lib/github-dark.min.css">
     <script src="lib/highlight.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.6/dist/vis-network.min.js"></script>
 </head>
 <body>
     <div class="layout">
         <div class="sidebar" id="sidebar">
             <a href="index.html" style="text-decoration: none; color:white;"><h2>C# Краткий учебник</h2></a>
             <button id="toggleMenu" class="mobileMenuBtn">☰</button>
-            <input id="search" placeholder="Поиск темы">
+            <input id="search" placeholder="Поиск по всему материалу...">
+            <div id="searchResults" class="search-results hidden"></div>
             <div id="currentTopicTitle" style="display: none;"></div>
             <div id="backToTopics" style="display: none; margin-bottom: 10px;">
                 <button id="backButton">← Все темы</button>
             </div>
             <ul id="menu"></ul>
-            
             <div class="sidebar-footer">
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+                    <button id="glossaryBtn" class="sidebar-btn">📖 Глоссарий</button>
+                    <button id="graphBtn" class="sidebar-btn">🗺 Граф знаний</button>
+                </div>
                 <div class="theme-switch-wrapper">
                     <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему">🌙</button>
                 </div>
                 <p>Разработано VLPLAY Games</p>
-                <p>Версия 0.9.6</p>
+                <p>Версия 0.9.7</p>
             </div>
         </div>
-
         <div class="content">
             <div id="breadcrumbs" class="breadcrumbs"></div>
-
             <div id="mainScreen" class="fadeIn">
                 <h1>Добро пожаловать!</h1>
                 <p>Выберите тему слева или проверьте свои знания в тесте.</p>
@@ -45,11 +48,16 @@
                     </div>
                 </div>
             </div>
-
             <div id="printPanel" class="print-panel hidden">
                 <div class="print-panel-header">
-                    <h3>Выберите темы для печати / PDF</h3>
+                    <h3>Печатная версия</h3>
                     <button id="closePrintPanel" class="close-btn">✕</button>
+                </div>
+                <div id="printOptions" class="print-options">
+                    <label><input type="checkbox" id="includeTheory" checked> Теория</label>
+                    <label><input type="checkbox" id="includeNotes" checked> Важное/Ошибки/Советы</label>
+                    <label><input type="checkbox" id="includeExamples" checked> Примеры</label>
+                    <label><input type="checkbox" id="includeScreens" checked> Скриншоты</label>
                 </div>
                 <div id="printTopicsList" class="print-topics-list"></div>
                 <div class="print-panel-buttons">
@@ -61,26 +69,17 @@
                     <em>Для сохранения в PDF выберите в диалоге печати пункт «Сохранить как PDF».</em>
                 </p>
             </div>
-
             <div id="quizScreen" class="hidden fadeIn">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <h2>Тест по C#</h2>
                     <button id="toggleQuizSettingsBtn" class="settings-btn" title="Настройки теста">⚙️</button>
                 </div>
-                
                 <div id="quizSettingsPanel">
                     <div id="quizModeSelector" class="quiz-mode-selector">
-                        <label>
-                            <input type="radio" name="quizMode" value="radio" checked> Обычный (один вариант)
-                        </label>
-                        <label>
-                            <input type="radio" name="quizMode" value="checkbox"> Обычный (несколько вариантов)
-                        </label>
-                        <label>
-                            <input type="radio" name="quizMode" value="match"> Блочный (соедини вопрос-ответ)
-                        </label>
+                        <label><input type="radio" name="quizMode" value="radio" checked> Обычный (один вариант)</label>
+                        <label><input type="radio" name="quizMode" value="checkbox"> Обычный (несколько вариантов)</label>
+                        <label><input type="radio" name="quizMode" value="match"> Блочный (соедини вопрос-ответ)</label>
                     </div>
-
                     <div id="quizTopicSelector">
                         <p>Выберите темы для теста:</p>
                         <div id="quizTopicsList" class="quiz-topics-list"></div>
@@ -91,10 +90,8 @@
                         <button id="quizStartBtn" class="quiz-start-btn">Начать тест</button>
                     </div>
                 </div>
-
                 <div id="quizTestArea" class="hidden">
                     <div id="quizContainer" class="quiz-container"></div>
-
                     <div id="matchContainer" class="match-container hidden">
                         <div class="match-columns">
                             <div class="match-left" id="matchQuestions"></div>
@@ -102,30 +99,26 @@
                         </div>
                         <canvas id="matchCanvas"></canvas>
                     </div>
-
                     <div id="quizControls" class="quiz-controls" style="display: none;">
                         <button id="quizCheckBtn">Проверить ответы</button>
                         <button id="quizResetBtn">Сбросить</button>
                     </div>
-
                     <div id="quizResult" class="quiz-result hidden"></div>
                 </div>
             </div>
+            <div id="glossaryScreen" class="hidden fadeIn"></div>
+            <div id="graphScreen" class="hidden fadeIn"></div>
 
             <h1 id="title" class="hidden fadeIn">Выберите тему</h1>
-
             <div class="section" id="theorySection">
                 <h2>Теория</h2>
                 <div id="theory" class="fadeIn"></div>
             </div>
-
             <div id="info" class="fadeIn"></div>
-
             <div class="section" id="examplesSection">
                 <h2>Примеры</h2>
                 <div id="examples" class="fadeIn"></div>
             </div>
-
             <div class="section" id="screensSection">
                 <h2>Скриншоты</h2>
                 <div id="screens" class="fadeIn"></div>
@@ -141,7 +134,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=0.9.6"></script>
-    <script src="quiz.js?v=0.9.6"></script>
+    <script src="script.js?v=0.9.7"></script>
+    <script src="quiz.js?v=0.9.7"></script>
 </body>
 </html>

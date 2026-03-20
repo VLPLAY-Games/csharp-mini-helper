@@ -1,17 +1,24 @@
 let topics = [];
 let currentTopic = null;
 let isMenuAnimating = false;
-let currentMenuIsTopic = false; // false - список тем, true - оглавление темы
+let currentMenuIsTopic = false;
+let quizData = [];
+let glossary = [];
 
-fetch("db/topics.json")
-    .then(r => r.json())
-    .then(data => {
-        topics = data.topics;
-        renderMenu(topics, null);
-        renderTopicCheckboxes();
-        renderPrintCheckboxes();
-        updateBreadcrumbs(['Главная']);
-    });
+// Загрузка данных
+Promise.all([
+    fetch("db/topics.json").then(r => r.json()),
+    fetch("db/quiz.json").then(r => r.json()),
+    fetch("db/glossary.json").then(r => r.json())
+]).then(([topicsData, quizDataRaw, glossaryData]) => {
+    topics = topicsData.topics;
+    quizData = quizDataRaw.questions;
+    glossary = glossaryData;
+    renderMenu(topics, null);
+    renderTopicCheckboxes();
+    renderPrintCheckboxes();
+    updateBreadcrumbs(['Главная']);
+}).catch(err => console.error('Ошибка загрузки данных:', err));
 
 // Универсальная функция для плавной смены содержимого меню
 function switchMenu(renderFunc, ...args) {
@@ -71,7 +78,6 @@ function renderTopicMenu(topic) {
     filterMenu();
 }
 
-// Вспомогательная функция для создания пункта меню темы
 function addMenuItem(menu, text, targetId) {
     const li = document.createElement("li");
     li.textContent = text;
@@ -91,7 +97,6 @@ function addMenuItem(menu, text, targetId) {
     menu.appendChild(li);
 }
 
-// Плавный скролл к элементу
 function scrollToElement(id) {
     const element = document.getElementById(id);
     if (element) {
@@ -99,7 +104,6 @@ function scrollToElement(id) {
     }
 }
 
-// Фильтрация меню по поиску
 function filterMenu() {
     const searchValue = document.getElementById("search").value.toLowerCase();
     const items = document.querySelectorAll("#menu li");
@@ -109,7 +113,6 @@ function filterMenu() {
     });
 }
 
-// Обновление хлебных крошек
 function updateBreadcrumbs(path) {
     const container = document.getElementById("breadcrumbs");
     if (!container) return;
@@ -136,10 +139,11 @@ function updateBreadcrumbs(path) {
     });
 }
 
-// Показать главный экран
 function showMainScreen() {
     document.getElementById("mainScreen").classList.remove("hidden");
     document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("glossaryScreen").classList.add("hidden");
+    document.getElementById("graphScreen").classList.add("hidden");
     document.getElementById("title").classList.add("hidden");
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
@@ -155,47 +159,30 @@ function showMainScreen() {
     updateBreadcrumbs(['Главная']);
 }
 
-// Загрузка темы
 function loadTopic(topic) {
     currentTopic = topic;
 
-    const mainScreen = document.getElementById("mainScreen");
-    const title = document.getElementById("title");
-    const quizScreen = document.getElementById("quizScreen");
-
-    const theorySection = document.getElementById("theorySection");
-    const examplesSection = document.getElementById("examplesSection");
-    const screensSection = document.getElementById("screensSection");
-    const info = document.getElementById("info");
-
-    quizScreen.classList.add("hidden");
-
-    mainScreen.classList.add("hidden");
-    title.classList.remove("hidden");
-    theorySection.style.display = "block";
-    examplesSection.style.display = "block";
-    screensSection.style.display = "block";
-
-    info.style.display = "block";
-
-    [mainScreen, title, document.getElementById("theory"), document.getElementById("examples"), info, document.getElementById("screens")].forEach(el => {
-        if (el) {
-            el.classList.remove("fadeIn");
-            void el.offsetWidth;
-            el.classList.add("fadeIn");
-        }
-    });
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("glossaryScreen").classList.add("hidden");
+    document.getElementById("graphScreen").classList.add("hidden");
+    document.getElementById("title").classList.remove("hidden");
+    document.getElementById("theorySection").style.display = "block";
+    document.getElementById("examplesSection").style.display = "block";
+    document.getElementById("screensSection").style.display = "block";
+    document.getElementById("info").style.display = "block";
 
     document.getElementById("title").textContent = topic.title;
     document.getElementById("theory").innerHTML = topic.theory;
 
-    info.innerHTML = "";
-    if (topic.important) info.innerHTML += `<div class="important">⚠ <b>Важно:</b> ${topic.important}</div>`;
-    if (topic.error) info.innerHTML += `<div class="error">❌ <b>Ошибка:</b> ${topic.error}</div>`;
-    if (topic.tip) info.innerHTML += `<div class="tip">💡 <b>Совет:</b> ${topic.tip}</div>`;
+    const infoDiv = document.getElementById("info");
+    infoDiv.innerHTML = "";
+    if (topic.important) infoDiv.innerHTML += `<div class="important">⚠ <b>Важно:</b> ${topic.important}</div>`;
+    if (topic.error) infoDiv.innerHTML += `<div class="error">❌ <b>Ошибка:</b> ${topic.error}</div>`;
+    if (topic.tip) infoDiv.innerHTML += `<div class="tip">💡 <b>Совет:</b> ${topic.tip}</div>`;
 
-    const examples = document.getElementById("examples");
-    examples.innerHTML = "";
+    const examplesDiv = document.getElementById("examples");
+    examplesDiv.innerHTML = "";
     if (topic.examples && topic.examples.length > 0) {
         topic.examples.forEach((ex, idx) => {
             const block = document.createElement("div");
@@ -213,7 +200,6 @@ function loadTopic(topic) {
                 block.appendChild(descDiv);
             }
 
-            // Добавление скриншотов примера, если есть (поддержка объектов с src, width, alt)
             if (ex.screens && ex.screens.length > 0) {
                 const screensDiv = document.createElement("div");
                 screensDiv.className = "example-screens";
@@ -305,24 +291,23 @@ function loadTopic(topic) {
                 block.appendChild(btn);
             }
 
-            examples.appendChild(block);
+            examplesDiv.appendChild(block);
         });
     } else {
-        examplesSection.style.display = "none";
+        document.getElementById("examplesSection").style.display = "none";
     }
 
-    const screens = document.getElementById("screens");
-    screens.innerHTML = "";
+    const screensDiv = document.getElementById("screens");
+    screensDiv.innerHTML = "";
     if (topic.screens && topic.screens.length > 0) {
         topic.screens.forEach(img => {
             const image = document.createElement("img");
             image.src = img;
             image.className = "screen";
-            screens.appendChild(image);
+            screensDiv.appendChild(image);
         });
-        screens.id = "screens";
     } else {
-        screensSection.style.display = "none";
+        document.getElementById("screensSection").style.display = "none";
     }
 
     document.querySelectorAll('pre code').forEach((block) => {
@@ -332,11 +317,8 @@ function loadTopic(topic) {
         block.classList.add('hljs');
     });
 
-    const currentTopicTitle = document.getElementById("currentTopicTitle");
-    if (currentTopicTitle) {
-        currentTopicTitle.textContent = topic.title;
-        currentTopicTitle.style.display = "block";
-    }
+    document.getElementById("currentTopicTitle").textContent = topic.title;
+    document.getElementById("currentTopicTitle").style.display = "block";
     document.getElementById("backToTopics").style.display = "block";
 
     switchMenu(renderTopicMenu, topic);
@@ -352,26 +334,320 @@ function loadTopic(topic) {
     updateBreadcrumbs(['Главная', topic.title]);
 }
 
-// Возврат к главному меню (список тем), но контент текущей темы остаётся видимым
 function showMainMenu() {
-    const currentTopicTitle = document.getElementById("currentTopicTitle");
-    if (currentTopicTitle) {
-        currentTopicTitle.style.display = "none";
-    }
+    document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
-
     if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, currentTopic ? currentTopic.title : null);
     }
 }
 
-// Генерация печатной версии (PDF) для выбранных тем
-function generatePrintVersion(selectedIndices) {
+// ================== ПОИСК ==================
+const searchInput = document.getElementById("search");
+const searchResultsDiv = document.getElementById("searchResults");
+
+searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim().toLowerCase();
+    if (query.length < 2) {
+        searchResultsDiv.classList.add("hidden");
+        return;
+    }
+    const results = fullTextSearch(query);
+    displaySearchResults(results);
+});
+
+function fullTextSearch(query) {
+    const results = [];
+    // Поиск по темам
+    topics.forEach((topic, idx) => {
+        let score = 0;
+        let matchedParts = [];
+        // Заголовок
+        if (topic.title.toLowerCase().includes(query)) {
+            score += 10;
+            matchedParts.push(`Заголовок: ${topic.title}`);
+        }
+        // Теория
+        if (topic.theory && topic.theory.toLowerCase().includes(query)) {
+            score += 5;
+            matchedParts.push("Теория");
+        }
+        // Важные заметки
+        if (topic.important && topic.important.toLowerCase().includes(query)) {
+            score += 4;
+            matchedParts.push("Важно");
+        }
+        if (topic.error && topic.error.toLowerCase().includes(query)) {
+            score += 4;
+            matchedParts.push("Ошибка");
+        }
+        if (topic.tip && topic.tip.toLowerCase().includes(query)) {
+            score += 4;
+            matchedParts.push("Совет");
+        }
+        // Примеры
+        if (topic.examples) {
+            topic.examples.forEach((ex, exIdx) => {
+                if (ex.name && ex.name.toLowerCase().includes(query)) {
+                    score += 3;
+                    matchedParts.push(`Пример: ${ex.name}`);
+                }
+                if (ex.description && ex.description.toLowerCase().includes(query)) {
+                    score += 3;
+                    matchedParts.push(`Описание примера: ${ex.name}`);
+                }
+                if (ex.code && ex.code.toLowerCase().includes(query)) {
+                    score += 3;
+                    matchedParts.push(`Код: ${ex.name}`);
+                }
+                if (ex.codes) {
+                    ex.codes.forEach(code => {
+                        if (code.toLowerCase().includes(query)) {
+                            score += 3;
+                            matchedParts.push(`Код: ${ex.name}`);
+                        }
+                    });
+                }
+            });
+        }
+        if (score > 0) {
+            results.push({
+                type: "topic",
+                topicIndex: idx,
+                title: topic.title,
+                score: score,
+                matchedParts: matchedParts.slice(0, 3)
+            });
+        }
+    });
+    // Поиск по вопросам теста
+    quizData.forEach((q, idx) => {
+        if (q.question.toLowerCase().includes(query)) {
+            results.push({
+                type: "quiz",
+                topicIndex: q.topicIndex,
+                question: q.question,
+                score: 5
+            });
+        }
+    });
+    // Поиск по глоссарию
+    glossary.forEach(term => {
+        if (term.term.toLowerCase().includes(query) || term.definition.toLowerCase().includes(query)) {
+            results.push({
+                type: "glossary",
+                term: term.term,
+                definition: term.definition,
+                score: 4
+            });
+        }
+    });
+    results.sort((a,b) => b.score - a.score);
+    return results.slice(0, 15);
+}
+
+function displaySearchResults(results) {
+    if (results.length === 0) {
+        searchResultsDiv.classList.add("hidden");
+        return;
+    }
+    searchResultsDiv.innerHTML = "";
+    results.forEach(res => {
+        const div = document.createElement("div");
+        div.className = "search-result-item";
+        if (res.type === "topic") {
+            div.innerHTML = `<strong>📘 Тема: ${res.title}</strong><br><small>${res.matchedParts.join(", ")}</small>`;
+            div.onclick = () => {
+                loadTopic(topics[res.topicIndex]);
+                searchResultsDiv.classList.add("hidden");
+                searchInput.value = "";
+            };
+        } else if (res.type === "quiz") {
+            div.innerHTML = `<strong>❓ Вопрос теста:</strong> ${res.question}`;
+            div.onclick = () => {
+                // Перейти в тест с выбранной темой
+                const quizScreen = document.getElementById("quizScreen");
+                document.getElementById("mainScreen").classList.add("hidden");
+                quizScreen.classList.remove("hidden");
+                document.getElementById("title").classList.add("hidden");
+                document.getElementById("theorySection").style.display = "none";
+                document.getElementById("examplesSection").style.display = "none";
+                document.getElementById("screensSection").style.display = "none";
+                document.getElementById("info").style.display = "none";
+                document.getElementById("currentTopicTitle").style.display = "none";
+                document.getElementById("backToTopics").style.display = "none";
+                if (currentMenuIsTopic) {
+                    switchMenu(renderMenu, topics, null);
+                }
+                updateBreadcrumbs(['Главная', 'Тест']);
+                // Автоматически выбрать тему
+                const topicCheckbox = document.querySelector(`#quizTopicsList input[value="${res.topicIndex}"]`);
+                if (topicCheckbox) topicCheckbox.checked = true;
+                searchResultsDiv.classList.add("hidden");
+                searchInput.value = "";
+            };
+        } else if (res.type === "glossary") {
+            div.innerHTML = `<strong>📖 Глоссарий: ${res.term}</strong><br><small>${res.definition.substring(0, 100)}...</small>`;
+            div.onclick = () => {
+                showGlossary();
+                // Прокрутить к термину
+                setTimeout(() => {
+                    const termElem = document.getElementById(`glossary-${res.term.replace(/\s/g, '-')}`);
+                    if (termElem) termElem.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
+                searchResultsDiv.classList.add("hidden");
+                searchInput.value = "";
+            };
+        }
+        searchResultsDiv.appendChild(div);
+    });
+    searchResultsDiv.classList.remove("hidden");
+}
+
+// ================== ГЛОССАРИЙ ==================
+function showGlossary() {
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("glossaryScreen").classList.remove("hidden");
+    document.getElementById("graphScreen").classList.add("hidden");
+    document.getElementById("title").classList.add("hidden");
+    document.getElementById("theorySection").style.display = "none";
+    document.getElementById("examplesSection").style.display = "none";
+    document.getElementById("screensSection").style.display = "none";
+    document.getElementById("info").style.display = "none";
+    document.getElementById("currentTopicTitle").style.display = "none";
+    document.getElementById("backToTopics").style.display = "none";
+    if (currentMenuIsTopic) {
+        switchMenu(renderMenu, topics, null);
+    }
+    updateBreadcrumbs(['Главная', 'Глоссарий']);
+    renderGlossary();
+}
+
+function renderGlossary() {
+    const container = document.getElementById("glossaryScreen");
+    container.innerHTML = "";
+    // Группировка по первой букве
+    const grouped = {};
+    glossary.forEach(term => {
+        const letter = term.term[0].toUpperCase();
+        if (!grouped[letter]) grouped[letter] = [];
+        grouped[letter].push(term);
+    });
+    const letters = Object.keys(grouped).sort();
+    // Алфавитный указатель
+    const alphabetDiv = document.createElement("div");
+    alphabetDiv.className = "glossary-alphabet";
+    letters.forEach(letter => {
+        const link = document.createElement("a");
+        link.href = `#glossary-${letter}`;
+        link.textContent = letter;
+        alphabetDiv.appendChild(link);
+    });
+    container.appendChild(alphabetDiv);
+    // Термины по буквам
+    letters.forEach(letter => {
+        const letterDiv = document.createElement("div");
+        letterDiv.className = "glossary-letter";
+        letterDiv.id = `glossary-${letter}`;
+        const h3 = document.createElement("h3");
+        h3.textContent = letter;
+        letterDiv.appendChild(h3);
+        grouped[letter].forEach(term => {
+            const termDiv = document.createElement("div");
+            termDiv.className = "glossary-term";
+            termDiv.id = `glossary-${term.term.replace(/\s/g, '-')}`;
+            const title = document.createElement("h4");
+            title.textContent = term.term;
+            const def = document.createElement("p");
+            def.textContent = term.definition;
+            termDiv.appendChild(title);
+            termDiv.appendChild(def);
+            letterDiv.appendChild(termDiv);
+        });
+        container.appendChild(letterDiv);
+    });
+}
+
+// ================== ГРАФ ЗНАНИЙ ==================
+let graphNetwork = null;
+function showKnowledgeGraph() {
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("glossaryScreen").classList.add("hidden");
+    document.getElementById("graphScreen").classList.remove("hidden");
+    document.getElementById("title").classList.add("hidden");
+    document.getElementById("theorySection").style.display = "none";
+    document.getElementById("examplesSection").style.display = "none";
+    document.getElementById("screensSection").style.display = "none";
+    document.getElementById("info").style.display = "none";
+    document.getElementById("currentTopicTitle").style.display = "none";
+    document.getElementById("backToTopics").style.display = "none";
+    if (currentMenuIsTopic) {
+        switchMenu(renderMenu, topics, null);
+    }
+    updateBreadcrumbs(['Главная', 'Граф знаний']);
+    renderGraph();
+}
+
+function renderGraph() {
+    const container = document.getElementById("graphScreen");
+    container.innerHTML = '<div id="knowledgeGraph" style="width: 100%; height: 100%;"></div>';
+    const nodes = [];
+    const edges = [];
+    topics.forEach((topic, idx) => {
+        nodes.push({
+            id: idx,
+            label: topic.title,
+            title: topic.title,
+            group: idx
+        });
+        if (topic.prerequisites) {
+            topic.prerequisites.forEach(prereqIdx => {
+                edges.push({
+                    from: prereqIdx,
+                    to: idx,
+                    arrows: 'to'
+                });
+            });
+        }
+    });
+    const data = {
+        nodes: new vis.DataSet(nodes),
+        edges: new vis.DataSet(edges)
+    };
+    const options = {
+        nodes: {
+            shape: 'box',
+            font: { size: 14, color: 'var(--text-dark)' },
+            color: { background: 'var(--bg-card)', border: 'var(--accent-primary)', highlight: { background: 'var(--accent-primary)' } }
+        },
+        edges: {
+            color: 'var(--accent-primary)',
+            width: 2,
+            smooth: { type: 'continuous' }
+        },
+        physics: {
+            stabilization: true,
+            solver: 'forceAtlas2Based'
+        },
+        interaction: { hover: true, navigationButtons: true }
+    };
+    graphNetwork = new vis.Network(document.getElementById("knowledgeGraph"), data, options);
+    graphNetwork.on("click", function(params) {
+        if (params.nodes.length > 0) {
+            const topicId = params.nodes[0];
+            loadTopic(topics[topicId]);
+        }
+    });
+}
+
+// ================== ПЕЧАТНАЯ ВЕРСИЯ ==================
+function generatePrintVersion(selectedIndices, options) {
     if (!topics || topics.length === 0) {
         alert("Данные ещё не загружены. Попробуйте позже.");
         return;
     }
-
     if (selectedIndices.length === 0) {
         alert("Выберите хотя бы одну тему.");
         return;
@@ -384,10 +660,10 @@ function generatePrintVersion(selectedIndices) {
             <meta charset="UTF-8">
             <title>C# Краткий учебник - Избранные темы</title>
             <style>
-                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; line-height: 1.5; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.5; }
                 h1 { color: #1e1e2f; border-bottom: 2px solid #4a7cff; padding-bottom: 10px; }
-                h2 { color: #2f5fe0; margin-top: 30px; }
-                h3 { color: #333; margin-top: 20px; }
+                h2 { color: #2f5fe0; margin-top: 30px; page-break-after: avoid; }
+                h3 { color: #333; margin-top: 20px; page-break-after: avoid; }
                 pre { background: #1e1e1e; color: #fff; padding: 15px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
                 code { font-family: Consolas, monospace; }
                 .important { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
@@ -399,43 +675,57 @@ function generatePrintVersion(selectedIndices) {
                 .example-column { flex: 1 1 250px; min-width: 0; }
                 .example-screens { display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0; align-items: flex-start; }
                 .example-screen { border: 1px solid #ddd; }
+                .toc { margin-bottom: 30px; page-break-after: avoid; }
+                .toc ul { list-style: none; padding-left: 20px; }
+                .toc a { text-decoration: none; color: #4a7cff; }
+                .toc a:hover { text-decoration: underline; }
                 @media print {
                     body { margin: 0.5in; }
                     pre { background: #f5f5f5; color: #000; border: 1px solid #ccc; }
+                    .page-break { page-break-before: always; }
+                    .toc { page-break-after: avoid; }
+                    h2, h3 { page-break-after: avoid; }
+                }
+                .page-number:after {
+                    content: counter(page);
                 }
             </style>
         </head>
         <body>
             <h1>C# Краткий учебник - Избранные темы</h1>
+            <div class="toc">
+                <h2>Содержание</h2>
+                <ul>
     `;
+    // Генерация оглавления
+    selectedIndices.sort((a,b)=>a-b);
+    selectedIndices.forEach(idx => {
+        const topic = topics[idx];
+        contentHTML += `<li><a href="#topic-${idx}">${idx}. ${topic.title}</a></li>`;
+    });
+    contentHTML += `</ul></div><div class="page-break"></div>`;
 
-    selectedIndices.sort((a, b) => a - b);
-
-    selectedIndices.forEach(index => {
-        const topic = topics[index];
+    // Тела тем
+    selectedIndices.forEach(idx => {
+        const topic = topics[idx];
         if (!topic) return;
-
-        contentHTML += `<h2>${index}. ${topic.title}</h2>`;
-
-        if (topic.theory) {
+        contentHTML += `<div id="topic-${idx}" class="topic-print">`;
+        contentHTML += `<h2>${idx}. ${topic.title}</h2>`;
+        if (options.includeTheory && topic.theory) {
             contentHTML += `<div>${topic.theory}</div>`;
         }
-
-        if (topic.important || topic.error || topic.tip) {
+        if (options.includeNotes && (topic.important || topic.error || topic.tip)) {
             if (topic.important) contentHTML += `<div class="important">⚠ <b>Важно:</b> ${topic.important}</div>`;
             if (topic.error) contentHTML += `<div class="error">❌ <b>Ошибка:</b> ${topic.error}</div>`;
             if (topic.tip) contentHTML += `<div class="tip">💡 <b>Совет:</b> ${topic.tip}</div>`;
         }
-
-        if (topic.examples && topic.examples.length > 0) {
+        if (options.includeExamples && topic.examples && topic.examples.length > 0) {
             contentHTML += `<h3>Примеры</h3>`;
-            topic.examples.forEach((ex, idx) => {
+            topic.examples.forEach((ex, exIdx) => {
                 contentHTML += `<div class="exampleBlock">`;
                 contentHTML += `<h4>${ex.name}</h4>`;
                 if (ex.description) contentHTML += `<div>${ex.description}</div>`;
-
-                // Добавляем скриншоты примера в печатную версию (поддержка объектов)
-                if (ex.screens && ex.screens.length > 0) {
+                if (options.includeScreens && ex.screens && ex.screens.length > 0) {
                     contentHTML += `<div class="example-screens">`;
                     ex.screens.forEach(screen => {
                         let src, width, alt;
@@ -453,7 +743,6 @@ function generatePrintVersion(selectedIndices) {
                     });
                     contentHTML += `</div>`;
                 }
-
                 if (ex.codes && Array.isArray(ex.codes)) {
                     contentHTML += `<div class="example-columns">`;
                     ex.codes.forEach(codeText => {
@@ -466,13 +755,13 @@ function generatePrintVersion(selectedIndices) {
                 contentHTML += `</div>`;
             });
         }
-
-        if (topic.screens && topic.screens.length > 0) {
+        if (options.includeScreens && topic.screens && topic.screens.length > 0) {
             contentHTML += `<h3>Скриншоты</h3>`;
             topic.screens.forEach(img => {
                 contentHTML += `<img src="${img}" class="screen" alt="Скриншот">`;
             });
         }
+        contentHTML += `</div><div class="page-break"></div>`;
     });
 
     contentHTML += `</body></html>`;
@@ -480,13 +769,11 @@ function generatePrintVersion(selectedIndices) {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(contentHTML);
     printWindow.document.close();
-
     printWindow.onload = function() {
         printWindow.print();
     };
 }
 
-// Вспомогательная функция для экранирования HTML (чтобы код отображался корректно)
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -496,67 +783,47 @@ function escapeHtml(unsafe) {
         .replace(/'/g, "&#039;");
 }
 
-// Обработчики событий
+// ================== ОБРАБОТЧИКИ СОБЫТИЙ ==================
 document.getElementById("search").addEventListener("input", filterMenu);
-
 document.getElementById("toggleMenu").addEventListener("click", function(e) {
     e.stopPropagation();
     const sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("show");
-
-    if (sidebar.classList.contains("show")) {
-        this.innerHTML = "✕";
-        this.style.minHeight = "60px";
-    } else {
-        this.innerHTML = "☰";
-        this.style.minHeight = "80px";
-    }
+    this.innerHTML = sidebar.classList.contains("show") ? "✕" : "☰";
 });
-
 document.querySelector(".content").addEventListener("click", function() {
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         if (sidebar.classList.contains("show")) {
             sidebar.classList.remove("show");
-            const toggleBtn = document.getElementById("toggleMenu");
-            toggleBtn.innerHTML = "☰";
-            toggleBtn.style.minHeight = "80px";
+            document.getElementById("toggleMenu").innerHTML = "☰";
         }
     }
 });
-
 document.getElementById("backButton").addEventListener("click", function() {
     showMainMenu();
 });
-
 window.addEventListener("resize", function() {
     if (window.innerWidth > 768) {
         document.getElementById("sidebar").classList.remove("show");
     }
 });
-
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
     document.getElementById("screensSection").style.display = "none";
     document.getElementById("title").classList.add("hidden");
     document.getElementById("backToTopics").style.display = "none";
-    const currentTopicTitle = document.getElementById("currentTopicTitle");
-    if (currentTopicTitle) {
-        currentTopicTitle.style.display = "none";
-    }
+    document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("info").style.display = "none";
-
-    // Инициализация темы
     initTheme();
-    // Инициализация lightbox
     initLightbox();
 });
-
-// Обработчик кнопки перехода к тесту
 document.getElementById("goToQuizBtn").addEventListener("click", function() {
     document.getElementById("mainScreen").classList.add("hidden");
     document.getElementById("quizScreen").classList.remove("hidden");
+    document.getElementById("glossaryScreen").classList.add("hidden");
+    document.getElementById("graphScreen").classList.add("hidden");
     document.getElementById("title").classList.add("hidden");
     document.getElementById("theorySection").style.display = "none";
     document.getElementById("examplesSection").style.display = "none";
@@ -564,43 +831,38 @@ document.getElementById("goToQuizBtn").addEventListener("click", function() {
     document.getElementById("info").style.display = "none";
     document.getElementById("currentTopicTitle").style.display = "none";
     document.getElementById("backToTopics").style.display = "none";
-    
     if (currentMenuIsTopic) {
         switchMenu(renderMenu, topics, null);
     }
-    
     updateBreadcrumbs(['Главная', 'Тест']);
 });
-
-// Обработчик кнопки печатной версии
 document.getElementById("printVersionBtn").addEventListener("click", function() {
     document.getElementById("printPanel").classList.remove("hidden");
 });
-
-// Закрыть панель печати
 document.getElementById("closePrintPanel").addEventListener("click", function() {
     document.getElementById("printPanel").classList.add("hidden");
 });
-
-// Выбрать все темы для печати
 document.getElementById("printSelectAllBtn").addEventListener("click", function() {
     document.querySelectorAll('#printTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
 });
-
-// Сбросить все темы для печати
 document.getElementById("printDeselectAllBtn").addEventListener("click", function() {
     document.querySelectorAll('#printTopicsList input[type="checkbox"]').forEach(cb => cb.checked = false);
 });
-
-// Создать PDF для выбранных тем
 document.getElementById("generatePrintBtn").addEventListener("click", function() {
     const checkboxes = document.querySelectorAll('#printTopicsList input[type="checkbox"]:checked');
     const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
-    generatePrintVersion(selectedIndices);
+    const options = {
+        includeTheory: document.getElementById("includeTheory").checked,
+        includeNotes: document.getElementById("includeNotes").checked,
+        includeExamples: document.getElementById("includeExamples").checked,
+        includeScreens: document.getElementById("includeScreens").checked
+    };
+    generatePrintVersion(selectedIndices, options);
     document.getElementById("printPanel").classList.add("hidden");
 });
+document.getElementById("glossaryBtn").addEventListener("click", showGlossary);
+document.getElementById("graphBtn").addEventListener("click", showKnowledgeGraph);
 
-// Функция для создания чекбоксов тем для теста
 function renderTopicCheckboxes() {
     const container = document.getElementById("quizTopicsList");
     if (!container) return;
@@ -608,23 +870,18 @@ function renderTopicCheckboxes() {
     topics.forEach((topic, index) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "quiz-topic-item";
-
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `topic_${index}`;
         checkbox.value = index;
-
         const label = document.createElement("label");
         label.htmlFor = `topic_${index}`;
         label.textContent = `${index}. ${topic.title}`;
-
         itemDiv.appendChild(checkbox);
         itemDiv.appendChild(label);
         container.appendChild(itemDiv);
     });
 }
-
-// Функция для создания чекбоксов тем для печати
 function renderPrintCheckboxes() {
     const container = document.getElementById("printTopicsList");
     if (!container) return;
@@ -632,23 +889,18 @@ function renderPrintCheckboxes() {
     topics.forEach((topic, index) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "print-topic-item";
-
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `print_topic_${index}`;
         checkbox.value = index;
-
         const label = document.createElement("label");
         label.htmlFor = `print_topic_${index}`;
         label.textContent = `${index}. ${topic.title}`;
-
         itemDiv.appendChild(checkbox);
         itemDiv.appendChild(label);
         container.appendChild(itemDiv);
     });
 }
-
-// Обработчики для кнопок "Выбрать все" и "Сбросить" в тесте
 document.getElementById("quizSelectAllBtn").addEventListener("click", function() {
     document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
 });
@@ -656,71 +908,60 @@ document.getElementById("quizDeselectAllBtn").addEventListener("click", function
     document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = false);
 });
 
-// Регистрация Service Worker
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => console.log('Service Worker зарегистрирован:', reg))
-      .catch(err => console.log('Ошибка регистрации Service Worker:', err));
-  });
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker зарегистрирован:', reg))
+            .catch(err => console.log('Ошибка регистрации Service Worker:', err));
+    });
 }
 
-// ================== Тёмная тема ==================
 function initTheme() {
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
-    
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
         themeToggle.textContent = '☀️';
     } else {
         themeToggle.textContent = '🌙';
     }
-
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-theme');
         const isDark = document.body.classList.contains('dark-theme');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         themeToggle.textContent = isDark ? '☀️' : '🌙';
+        // Обновить граф, если открыт
+        if (graphNetwork) {
+            renderGraph();
+        }
     });
 }
 
-// ================== Lightbox ==================
 function initLightbox() {
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = lightbox.querySelector('.lightbox-image');
     const lightboxCaption = lightbox.querySelector('.lightbox-caption');
     const closeBtn = lightbox.querySelector('.lightbox-close');
     const overlay = lightbox.querySelector('.lightbox-overlay');
-
     function openLightbox(imgElement) {
-        const src = imgElement.getAttribute('src');
-        const alt = imgElement.getAttribute('alt') || '';
-        lightboxImg.src = src;
-        lightboxImg.alt = alt;
-        lightboxCaption.textContent = alt;
+        lightboxImg.src = imgElement.getAttribute('src');
+        lightboxImg.alt = imgElement.getAttribute('alt') || '';
+        lightboxCaption.textContent = lightboxImg.alt;
         lightbox.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
-
     function closeLightbox() {
         lightbox.classList.add('hidden');
         document.body.style.overflow = '';
     }
-
-    // Делегирование событий для всех скриншотов (как общих, так и примеров)
     document.body.addEventListener('click', (e) => {
-        const target = e.target;
-        if (target.matches('.screen, .example-screen')) {
+        if (e.target.matches('.screen, .example-screen')) {
             e.preventDefault();
-            openLightbox(target);
+            openLightbox(e.target);
         }
     });
-
     closeBtn.addEventListener('click', closeLightbox);
     overlay.addEventListener('click', closeLightbox);
-
-    // Закрытие по Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
             closeLightbox();

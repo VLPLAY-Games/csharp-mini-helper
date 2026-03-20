@@ -1,6 +1,4 @@
-// service-worker.js
-
-const CACHE_NAME = 'csharp-tutorial-v0.9.6';
+const CACHE_NAME = 'csharp-tutorial-v0.9.7';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,6 +9,7 @@ const urlsToCache = [
   '/lib/github-dark.min.css',
   '/db/topics.json',
   '/db/quiz.json',
+  '/db/glossary.json',
   '/images/icon.svg',
   '/screenshots/0/create_project_1.jpg',
   '/screenshots/0/install_3.jpg',
@@ -21,7 +20,6 @@ const urlsToCache = [
   '/screenshots/0/run_program_1.jpg'
 ];
 
-// Установка Service Worker и кэширование всех файлов
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -29,7 +27,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Активация: удаляем старые версии кэша
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -43,7 +40,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Перехват запросов: сначала пытаемся взять из кэша, если нет – идём в сеть
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
