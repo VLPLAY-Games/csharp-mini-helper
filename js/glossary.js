@@ -1,5 +1,11 @@
 // glossary.js
+let glossaryExportButtonAdded = false; // флаг для предотвращения дублирования
+
 function showGlossary() {
+    // Удаляем кнопку экспорта темы, если она есть (чтобы не мешала на экране глоссария)
+    const topicExportBtn = document.getElementById("exportCurrentTopicBtn");
+    if (topicExportBtn) topicExportBtn.remove();
+
     document.getElementById("mainScreen").classList.add("hidden");
     document.getElementById("quizScreen").classList.add("hidden");
     document.getElementById("glossaryScreen").classList.remove("hidden");
@@ -22,27 +28,32 @@ function showGlossary() {
         searchInput.addEventListener("input", filterGlossary);
     }
 
-    // Добавляем кнопку экспорта в PDF, если её ещё нет
     addExportGlossaryButton();
 }
 
 function addExportGlossaryButton() {
+    // Добавляем кнопку только один раз за всё время работы приложения
+    if (glossaryExportButtonAdded) return;
+
     const glossaryScreen = document.getElementById("glossaryScreen");
     let exportBtn = document.getElementById("exportGlossaryBtn");
     if (!exportBtn) {
         exportBtn = document.createElement("button");
         exportBtn.id = "exportGlossaryBtn";
-        exportBtn.textContent = "Экспорт глоссария в PDF";
-        exportBtn.style.marginBottom = "20px";
+        exportBtn.textContent = "📄 Экспорт глоссария в PDF";
+        exportBtn.style.marginTop = "30px";
+        exportBtn.style.display = "block";
+        exportBtn.style.marginLeft = "auto";
+        exportBtn.style.marginRight = "auto";
         exportBtn.style.background = "var(--success)";
         exportBtn.addEventListener("click", exportGlossaryToPDF);
-        // Вставляем кнопку после поиска, но перед контентом
-        const searchDiv = glossaryScreen.querySelector('.glossary-search');
-        if (searchDiv) {
-            searchDiv.insertAdjacentElement('afterend', exportBtn);
+        const contentDiv = document.getElementById("glossaryContent");
+        if (contentDiv) {
+            contentDiv.insertAdjacentElement('afterend', exportBtn);
         } else {
-            glossaryScreen.prepend(exportBtn);
+            glossaryScreen.appendChild(exportBtn);
         }
+        glossaryExportButtonAdded = true;
     }
 }
 
@@ -52,7 +63,6 @@ function exportGlossaryToPDF() {
         return;
     }
 
-    // Группируем термины по первой букве
     const grouped = {};
     glossary.forEach(term => {
         const letter = term.term[0].toUpperCase();
@@ -61,7 +71,6 @@ function exportGlossaryToPDF() {
     });
     const letters = Object.keys(grouped).sort();
 
-    // Строим HTML для печати
     let contentHTML = `
         <!DOCTYPE html>
         <html>
@@ -69,49 +78,14 @@ function exportGlossaryToPDF() {
             <meta charset="UTF-8">
             <title>C# Глоссарий</title>
             <style>
-                body {
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    margin: 20px;
-                    line-height: 1.5;
-                }
-                h1 {
-                    color: #1e1e2f;
-                    border-bottom: 2px solid #4a7cff;
-                    padding-bottom: 10px;
-                }
-                .glossary-letter {
-                    margin-bottom: 30px;
-                    page-break-inside: avoid;
-                }
-                .glossary-letter h2 {
-                    color: #2f5fe0;
-                    background: #f0f2f8;
-                    padding: 5px 10px;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                }
-                .glossary-term {
-                    margin: 15px 0;
-                    padding: 10px;
-                    border-left: 4px solid #4a7cff;
-                    background: #f9f9fc;
-                }
-                .glossary-term h3 {
-                    margin: 0 0 5px 0;
-                    color: #2f5fe0;
-                }
-                .glossary-term p {
-                    margin: 0;
-                }
-                @media print {
-                    body { margin: 0.5in; }
-                    .glossary-letter {
-                        page-break-inside: avoid;
-                    }
-                    .glossary-term {
-                        break-inside: avoid;
-                    }
-                }
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; line-height: 1.5; }
+                h1 { color: #1e1e2f; border-bottom: 2px solid #4a7cff; padding-bottom: 10px; }
+                .glossary-letter { margin-bottom: 30px; page-break-inside: avoid; }
+                .glossary-letter h2 { color: #2f5fe0; background: #f0f2f8; padding: 5px 10px; border-radius: 6px; margin-bottom: 15px; }
+                .glossary-term { margin: 15px 0; padding: 10px; border-left: 4px solid #4a7cff; background: #f9f9fc; }
+                .glossary-term h3 { margin: 0 0 5px 0; color: #2f5fe0; }
+                .glossary-term p { margin: 0; }
+                @media print { body { margin: 0.5in; } .glossary-letter { page-break-inside: avoid; } .glossary-term { break-inside: avoid; } }
             </style>
         </head>
         <body>
@@ -137,9 +111,7 @@ function exportGlossaryToPDF() {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(contentHTML);
     printWindow.document.close();
-    printWindow.onload = function() {
-        printWindow.print();
-    };
+    printWindow.onload = function() { printWindow.print(); };
 }
 
 function renderGlossary() {
