@@ -3,6 +3,7 @@ window.onDataLoaded = function() {
     renderMenu(topics, null);
     renderTopicCheckboxes();
     renderPrintCheckboxes();
+    renderPrintCheckboxesWithGear();
     updateBreadcrumbs(['Главная']);
     attachEventHandlers();
     initScrollToTop();
@@ -153,15 +154,31 @@ if ('serviceWorker' in navigator) {
 // Кнопка "Наверх"
 function initScrollToTop() {
     const btn = document.getElementById("scrollToTopBtn");
-    window.addEventListener("scroll", () => {
-        if (window.scrollY > 300) {
+    const scrollableElement = document.querySelector(".content") || document.querySelector("main") || window;
+    
+    if (!btn) return;
+    
+    const checkScroll = () => {
+        const scrollTop = scrollableElement === window 
+            ? window.scrollY 
+            : scrollableElement.scrollTop;
+        
+        if (scrollTop > 300) {
             btn.classList.add("show");
         } else {
             btn.classList.remove("show");
         }
-    });
+    };
+    
+    scrollableElement.addEventListener("scroll", checkScroll);
+    checkScroll();
+    
     btn.addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (scrollableElement === window) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            scrollableElement.scrollTo({ top: 0, behavior: "smooth" });
+        }
     });
 }
 

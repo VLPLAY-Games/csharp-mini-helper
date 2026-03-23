@@ -37,35 +37,20 @@ function attachGraphControls() {
         });
     }
 
-    const exportPNG = document.getElementById("graphExportPNG");
-    if (exportPNG) {
-        exportPNG.addEventListener("click", () => {
-            const canvas = document.querySelector("#knowledgeGraph canvas");
-            if (canvas) {
-                const link = document.createElement("a");
-                link.download = "graph.png";
-                link.href = canvas.toDataURL();
-                link.click();
-            }
-        });
-    }
-
-    const exportSVG = document.getElementById("graphExportSVG");
-    if (exportSVG) {
-        exportSVG.addEventListener("click", () => {
-            const svg = document.querySelector("#knowledgeGraph svg");
-            if (svg) {
-                const serializer = new XMLSerializer();
-                let source = serializer.serializeToString(svg);
-                source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-                const blob = new Blob([source], { type: "image/svg+xml" });
-                const link = document.createElement("a");
-                link.download = "graph.svg";
-                link.href = URL.createObjectURL(blob);
-                link.click();
-                URL.revokeObjectURL(link.href);
-            }
-        });
+    // Единая кнопка экспорта с выпадающим меню
+    const exportContainer = document.getElementById("graphExportContainer");
+    if (exportContainer) {
+        exportContainer.innerHTML = `
+            <div class="graph-export-dropdown">
+                <button class="graph-export-btn">Экспорт ▼</button>
+                <div class="graph-export-dropdown-content">
+                    <button id="graphExportPNG">PNG</button>
+                    <button id="graphExportSVG">SVG</button>
+                </div>
+            </div>
+        `;
+        document.getElementById("graphExportPNG")?.addEventListener("click", () => exportGraph('png'));
+        document.getElementById("graphExportSVG")?.addEventListener("click", () => exportGraph('svg'));
     }
 
     const zoomIn = document.getElementById("graphZoomIn");
@@ -106,10 +91,35 @@ function attachGraphControls() {
     }
 }
 
+function exportGraph(format) {
+    if (format === 'png') {
+        const canvas = document.querySelector("#knowledgeGraph canvas");
+        if (canvas) {
+            const link = document.createElement("a");
+            link.download = "graph.png";
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    } else if (format === 'svg') {
+        const svg = document.querySelector("#knowledgeGraph svg");
+        if (svg) {
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svg);
+            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+            const blob = new Blob([source], { type: "image/svg+xml" });
+            const link = document.createElement("a");
+            link.download = "graph.svg";
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    }
+}
+
 function renderGraph() {
     const container = document.getElementById("knowledgeGraph");
     if (!container) return;
-    container.innerHTML = ""; // очищаем только контейнер графа
+    container.innerHTML = "";
 
     const style = getComputedStyle(document.body);
     const textColor = style.getPropertyValue('--text-dark').trim() || '#333333';
