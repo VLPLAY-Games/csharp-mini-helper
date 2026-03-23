@@ -89,6 +89,24 @@ function attachGraphControls() {
             }
         });
     }
+
+    // Кнопка остановки/запуска физики
+    const togglePhysicsBtn = document.getElementById("graphTogglePhysics");
+    if (togglePhysicsBtn) {
+        togglePhysicsBtn.textContent = graphPhysicsEnabled ? "⏸ Остановить" : "▶ Запустить";
+        togglePhysicsBtn.addEventListener("click", () => {
+            if (graphNetwork) {
+                graphPhysicsEnabled = !graphPhysicsEnabled;
+                graphNetwork.setOptions({ physics: graphPhysicsEnabled });
+                togglePhysicsBtn.textContent = graphPhysicsEnabled ? "⏸ Остановить" : "▶ Запустить";
+                if (graphPhysicsEnabled) {
+                    graphNetwork.startSimulation();
+                } else {
+                    graphNetwork.stopSimulation();
+                }
+            }
+        });
+    }
 }
 
 function exportGraph(format) {
