@@ -21,6 +21,125 @@ function showGlossary() {
     if (searchInput) {
         searchInput.addEventListener("input", filterGlossary);
     }
+
+    // Добавляем кнопку экспорта в PDF, если её ещё нет
+    addExportGlossaryButton();
+}
+
+function addExportGlossaryButton() {
+    const glossaryScreen = document.getElementById("glossaryScreen");
+    let exportBtn = document.getElementById("exportGlossaryBtn");
+    if (!exportBtn) {
+        exportBtn = document.createElement("button");
+        exportBtn.id = "exportGlossaryBtn";
+        exportBtn.textContent = "Экспорт глоссария в PDF";
+        exportBtn.style.marginBottom = "20px";
+        exportBtn.style.background = "var(--success)";
+        exportBtn.addEventListener("click", exportGlossaryToPDF);
+        // Вставляем кнопку после поиска, но перед контентом
+        const searchDiv = glossaryScreen.querySelector('.glossary-search');
+        if (searchDiv) {
+            searchDiv.insertAdjacentElement('afterend', exportBtn);
+        } else {
+            glossaryScreen.prepend(exportBtn);
+        }
+    }
+}
+
+function exportGlossaryToPDF() {
+    if (!glossary || glossary.length === 0) {
+        alert("Глоссарий пуст.");
+        return;
+    }
+
+    // Группируем термины по первой букве
+    const grouped = {};
+    glossary.forEach(term => {
+        const letter = term.term[0].toUpperCase();
+        if (!grouped[letter]) grouped[letter] = [];
+        grouped[letter].push(term);
+    });
+    const letters = Object.keys(grouped).sort();
+
+    // Строим HTML для печати
+    let contentHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>C# Глоссарий</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    margin: 20px;
+                    line-height: 1.5;
+                }
+                h1 {
+                    color: #1e1e2f;
+                    border-bottom: 2px solid #4a7cff;
+                    padding-bottom: 10px;
+                }
+                .glossary-letter {
+                    margin-bottom: 30px;
+                    page-break-inside: avoid;
+                }
+                .glossary-letter h2 {
+                    color: #2f5fe0;
+                    background: #f0f2f8;
+                    padding: 5px 10px;
+                    border-radius: 6px;
+                    margin-bottom: 15px;
+                }
+                .glossary-term {
+                    margin: 15px 0;
+                    padding: 10px;
+                    border-left: 4px solid #4a7cff;
+                    background: #f9f9fc;
+                }
+                .glossary-term h3 {
+                    margin: 0 0 5px 0;
+                    color: #2f5fe0;
+                }
+                .glossary-term p {
+                    margin: 0;
+                }
+                @media print {
+                    body { margin: 0.5in; }
+                    .glossary-letter {
+                        page-break-inside: avoid;
+                    }
+                    .glossary-term {
+                        break-inside: avoid;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Глоссарий терминов C#</h1>
+    `;
+
+    letters.forEach(letter => {
+        contentHTML += `<div class="glossary-letter">`;
+        contentHTML += `<h2>${letter}</h2>`;
+        grouped[letter].forEach(term => {
+            contentHTML += `
+                <div class="glossary-term">
+                    <h3>${escapeHtml(term.term)}</h3>
+                    <p>${escapeHtml(term.definition)}</p>
+                </div>
+            `;
+        });
+        contentHTML += `</div>`;
+    });
+
+    contentHTML += `</body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(contentHTML);
+    printWindow.document.close();
+    printWindow.onload = function() {
+        printWindow.print();
+    };
 }
 
 function renderGlossary() {
@@ -77,4 +196,13 @@ function filterGlossary() {
         const visibleTerms = Array.from(letter.querySelectorAll(".glossary-term")).some(t => t.style.display !== "none");
         letter.style.display = visibleTerms ? "" : "none";
     });
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
