@@ -77,7 +77,17 @@ function scrollToElement(id) {
     const element = document.getElementById(id);
     if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
+        highlightElement(element);
     }
+}
+
+function highlightElement(el) {
+    const originalBg = el.style.backgroundColor;
+    el.style.backgroundColor = "var(--accent-primary)";
+    el.style.transition = "background-color 0.5s";
+    setTimeout(() => {
+        el.style.backgroundColor = originalBg;
+    }, 1500);
 }
 
 function filterMenu() {
@@ -163,45 +173,55 @@ function fullTextSearch(query) {
     topics.forEach((topic, idx) => {
         let score = 0;
         let matchedParts = [];
+        let targetId = null;
         if (topic.title.toLowerCase().includes(query)) {
             score += 10;
             matchedParts.push(`Заголовок: ${topic.title}`);
+            targetId = `topic-${idx}`;
         }
         if (topic.theory && topic.theory.toLowerCase().includes(query)) {
             score += 5;
             matchedParts.push("Теория");
+            targetId = "theory";
         }
         if (topic.important && topic.important.toLowerCase().includes(query)) {
             score += 4;
             matchedParts.push("Важно");
+            targetId = "info";
         }
         if (topic.error && topic.error.toLowerCase().includes(query)) {
             score += 4;
             matchedParts.push("Ошибка");
+            targetId = "info";
         }
         if (topic.tip && topic.tip.toLowerCase().includes(query)) {
             score += 4;
             matchedParts.push("Совет");
+            targetId = "info";
         }
         if (topic.examples) {
-            topic.examples.forEach((ex) => {
+            topic.examples.forEach((ex, exIdx) => {
                 if (ex.name && ex.name.toLowerCase().includes(query)) {
                     score += 3;
                     matchedParts.push(`Пример: ${ex.name}`);
+                    targetId = `example-${exIdx}`;
                 }
                 if (ex.description && ex.description.toLowerCase().includes(query)) {
                     score += 3;
                     matchedParts.push(`Описание примера: ${ex.name}`);
+                    targetId = `example-${exIdx}`;
                 }
                 if (ex.code && ex.code.toLowerCase().includes(query)) {
                     score += 3;
                     matchedParts.push(`Код: ${ex.name}`);
+                    targetId = `example-${exIdx}`;
                 }
                 if (ex.codes) {
                     ex.codes.forEach(code => {
                         if (code.toLowerCase().includes(query)) {
                             score += 3;
                             matchedParts.push(`Код: ${ex.name}`);
+                            targetId = `example-${exIdx}`;
                         }
                     });
                 }
@@ -213,18 +233,20 @@ function fullTextSearch(query) {
                 topicIndex: idx,
                 title: topic.title,
                 score: score,
-                matchedParts: matchedParts.slice(0, 3)
+                matchedParts: matchedParts.slice(0, 3),
+                targetId: targetId || `topic-${idx}`
             });
         }
     });
     // Поиск по вопросам теста
-    quizData.forEach((q) => {
+    quizData.forEach((q, qIdx) => {
         if (q.question.toLowerCase().includes(query)) {
             results.push({
                 type: "quiz",
                 topicIndex: q.topicIndex,
                 question: q.question,
-                score: 5
+                score: 5,
+                targetId: `quiz-question-${qIdx}`
             });
         }
     });
@@ -235,7 +257,8 @@ function fullTextSearch(query) {
                 type: "glossary",
                 term: term.term,
                 definition: term.definition,
-                score: 4
+                score: 4,
+                targetId: `glossary-${term.term.replace(/\s/g, '-')}`
             });
         }
     });
@@ -256,6 +279,15 @@ function displaySearchResults(results) {
             div.innerHTML = `<strong>📘 Тема: ${res.title}</strong><br><small>${res.matchedParts.join(", ")}</small>`;
             div.onclick = () => {
                 loadTopic(topics[res.topicIndex]);
+                setTimeout(() => {
+                    if (res.targetId) {
+                        const elem = document.getElementById(res.targetId);
+                        if (elem) {
+                            elem.scrollIntoView({ behavior: "smooth", block: "center" });
+                            highlightElement(elem);
+                        }
+                    }
+                }, 300);
                 searchResultsDiv.classList.add("hidden");
                 searchInput.value = "";
             };
@@ -278,6 +310,14 @@ function displaySearchResults(results) {
                 updateBreadcrumbs(['Главная', 'Тест']);
                 const topicCheckbox = document.querySelector(`#quizTopicsList input[value="${res.topicIndex}"]`);
                 if (topicCheckbox) topicCheckbox.checked = true;
+                document.getElementById("quizStartBtn").click();
+                setTimeout(() => {
+                    const questionElem = document.getElementById(res.targetId);
+                    if (questionElem) {
+                        questionElem.scrollIntoView({ behavior: "smooth", block: "center" });
+                        highlightElement(questionElem);
+                    }
+                }, 500);
                 searchResultsDiv.classList.add("hidden");
                 searchInput.value = "";
             };
@@ -286,8 +326,9 @@ function displaySearchResults(results) {
             div.onclick = () => {
                 showGlossary();
                 setTimeout(() => {
-                    const termElem = document.getElementById(`glossary-${res.term.replace(/\s/g, '-')}`);
+                    const termElem = document.getElementById(res.targetId);
                     if (termElem) termElem.scrollIntoView({ behavior: "smooth", block: "start" });
+                    if (termElem) highlightElement(termElem);
                 }, 100);
                 searchResultsDiv.classList.add("hidden");
                 searchInput.value = "";

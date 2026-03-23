@@ -61,6 +61,7 @@ function loadTopic(topic) {
                     if (width) {
                         img.style.width = width + 'px';
                     }
+                    img.loading = "lazy";
                     screensDiv.appendChild(img);
                 });
                 block.appendChild(screensDiv);
@@ -144,6 +145,7 @@ function loadTopic(topic) {
             const image = document.createElement("img");
             image.src = img;
             image.className = "screen";
+            image.loading = "lazy";
             screensDiv.appendChild(image);
         });
     } else {
@@ -172,4 +174,29 @@ function loadTopic(topic) {
     }
 
     updateBreadcrumbs(['Главная', topic.title]);
+
+    addTooltipsToContent();
+}
+
+function addTooltipsToContent() {
+    const containers = [
+        document.getElementById("theory"),
+        document.getElementById("info"),
+        document.getElementById("examples")
+    ];
+    const glossaryMap = new Map();
+    glossary.forEach(term => glossaryMap.set(term.term.toLowerCase(), term.definition));
+
+    containers.forEach(container => {
+        if (!container) return;
+        const html = container.innerHTML;
+        const newHtml = html.replace(/\b([А-Яа-яA-Za-z0-9\s]+)\b/g, (match) => {
+            const lower = match.toLowerCase();
+            if (glossaryMap.has(lower)) {
+                return `<span class="tooltip-term" data-definition="${glossaryMap.get(lower).replace(/"/g, '&quot;')}">${match}</span>`;
+            }
+            return match;
+        });
+        container.innerHTML = newHtml;
+    });
 }

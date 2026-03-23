@@ -16,67 +16,100 @@ function showKnowledgeGraph() {
     }
     updateBreadcrumbs(['Главная', 'Граф знаний']);
     renderGraph();
-    addGraphControls();
+    attachGraphControls();
 }
 
-function addGraphControls() {
-    const graphScreen = document.getElementById("graphScreen");
-    let controlsPanel = graphScreen.querySelector('.graph-controls-panel');
-    if (controlsPanel) controlsPanel.remove();
-
-    controlsPanel = document.createElement('div');
-    controlsPanel.className = 'graph-controls-panel';
-    controlsPanel.style.position = 'absolute';
-    controlsPanel.style.bottom = '20px';
-    controlsPanel.style.right = '20px';
-    controlsPanel.style.display = 'flex';
-    controlsPanel.style.gap = '10px';
-    controlsPanel.style.zIndex = '100';
-    graphScreen.style.position = 'relative';
-    graphScreen.appendChild(controlsPanel);
-
-    const resetBtn = document.createElement('button');
-    resetBtn.textContent = 'Сбросить позиции';
-    resetBtn.style.padding = '8px 16px';
-    resetBtn.style.borderRadius = '20px';
-    resetBtn.style.background = 'var(--accent-primary)';
-    resetBtn.style.color = 'white';
-    resetBtn.style.border = 'none';
-    resetBtn.style.cursor = 'pointer';
-    resetBtn.onclick = () => {
-        if (graphNetwork) {
-            graphNetwork.setData(graphNetwork.body.data);
-            graphNetwork.fit();
-        }
-    };
-    controlsPanel.appendChild(resetBtn);
-
-    const togglePhysicsBtn = document.createElement('button');
-    togglePhysicsBtn.textContent = graphPhysicsEnabled ? 'Зафиксировать узлы' : 'Возобновить движение';
-    togglePhysicsBtn.style.padding = '8px 16px';
-    togglePhysicsBtn.style.borderRadius = '20px';
-    togglePhysicsBtn.style.background = 'var(--accent-primary)';
-    togglePhysicsBtn.style.color = 'white';
-    togglePhysicsBtn.style.border = 'none';
-    togglePhysicsBtn.style.cursor = 'pointer';
-    togglePhysicsBtn.onclick = () => {
-        if (graphNetwork) {
-            graphPhysicsEnabled = !graphPhysicsEnabled;
-            graphNetwork.setOptions({ physics: graphPhysicsEnabled });
-            togglePhysicsBtn.textContent = graphPhysicsEnabled ? 'Зафиксировать узлы' : 'Возобновить движение';
-            if (graphPhysicsEnabled) {
-                graphNetwork.startSimulation();
-            } else {
-                graphNetwork.stopSimulation();
+function attachGraphControls() {
+    const graphSearch = document.getElementById("graphSearch");
+    if (graphSearch) {
+        graphSearch.addEventListener("input", () => {
+            const query = graphSearch.value.toLowerCase();
+            if (graphNetwork) {
+                const nodes = graphNetwork.body.data.nodes.get();
+                const found = nodes.find(node => node.label.toLowerCase().includes(query));
+                if (found) {
+                    graphNetwork.selectNodes([found.id]);
+                    graphNetwork.focus(found.id, { scale: 1.5, animation: true });
+                } else {
+                    graphNetwork.unselectNodes();
+                }
             }
-        }
-    };
-    controlsPanel.appendChild(togglePhysicsBtn);
+        });
+    }
+
+    const exportPNG = document.getElementById("graphExportPNG");
+    if (exportPNG) {
+        exportPNG.addEventListener("click", () => {
+            const canvas = document.querySelector("#knowledgeGraph canvas");
+            if (canvas) {
+                const link = document.createElement("a");
+                link.download = "graph.png";
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        });
+    }
+
+    const exportSVG = document.getElementById("graphExportSVG");
+    if (exportSVG) {
+        exportSVG.addEventListener("click", () => {
+            const svg = document.querySelector("#knowledgeGraph svg");
+            if (svg) {
+                const serializer = new XMLSerializer();
+                let source = serializer.serializeToString(svg);
+                source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+                const blob = new Blob([source], { type: "image/svg+xml" });
+                const link = document.createElement("a");
+                link.download = "graph.svg";
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+        });
+    }
+
+    const zoomIn = document.getElementById("graphZoomIn");
+    if (zoomIn) {
+        zoomIn.addEventListener("click", () => {
+            if (graphNetwork) {
+                const scale = graphNetwork.getScale();
+                graphNetwork.moveTo({ scale: scale * 1.2 });
+            }
+        });
+    }
+
+    const zoomOut = document.getElementById("graphZoomOut");
+    if (zoomOut) {
+        zoomOut.addEventListener("click", () => {
+            if (graphNetwork) {
+                const scale = graphNetwork.getScale();
+                graphNetwork.moveTo({ scale: scale * 0.8 });
+            }
+        });
+    }
+
+    const fit = document.getElementById("graphFit");
+    if (fit) {
+        fit.addEventListener("click", () => {
+            if (graphNetwork) graphNetwork.fit();
+        });
+    }
+
+    const resetPhysics = document.getElementById("graphResetPhysics");
+    if (resetPhysics) {
+        resetPhysics.addEventListener("click", () => {
+            if (graphNetwork) {
+                graphNetwork.setData(graphNetwork.body.data);
+                graphNetwork.fit();
+            }
+        });
+    }
 }
 
 function renderGraph() {
-    const container = document.getElementById("graphScreen");
-    container.innerHTML = '<div id="knowledgeGraph" style="width: 100%; height: 100%;"></div>';
+    const container = document.getElementById("knowledgeGraph");
+    if (!container) return;
+    container.innerHTML = ""; // очищаем только контейнер графа
 
     const style = getComputedStyle(document.body);
     const textColor = style.getPropertyValue('--text-dark').trim() || '#333333';
@@ -183,7 +216,7 @@ function renderGraph() {
     if (graphNetwork) {
         graphNetwork.destroy();
     }
-    graphNetwork = new vis.Network(document.getElementById("knowledgeGraph"), data, options);
+    graphNetwork = new vis.Network(container, data, options);
     
     graphNetwork.setOptions({ physics: graphPhysicsEnabled });
     if (!graphPhysicsEnabled) {
@@ -197,7 +230,14 @@ function renderGraph() {
     graphNetwork.on("click", function(params) {
         if (params.nodes.length > 0) {
             const topicId = params.nodes[0];
-            loadTopic(topics[topicId]);
+            const topic = topics[topicId];
+            const infoDiv = document.getElementById("graphInfo");
+            if (infoDiv) {
+                infoDiv.innerHTML = `<strong>${topic.title}</strong><br>${topic.theory.substring(0, 200)}...<br><button onclick="loadTopic(topics[${topicId}])">Открыть тему</button>`;
+                infoDiv.classList.remove("hidden");
+            }
+        } else {
+            document.getElementById("graphInfo")?.classList.add("hidden");
         }
     });
 }

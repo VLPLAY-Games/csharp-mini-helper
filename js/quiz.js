@@ -182,6 +182,7 @@ function renderQuiz(questions, type) {
         questionText.className = "quiz-question-text";
         questionText.textContent = q.question;
         questionDiv.appendChild(questionText);
+        questionDiv.id = `quiz-question-${idx}`;
 
         const optionsDiv = document.createElement("div");
         optionsDiv.className = "quiz-options";

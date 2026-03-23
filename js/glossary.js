@@ -16,10 +16,15 @@ function showGlossary() {
     }
     updateBreadcrumbs(['Главная', 'Глоссарий']);
     renderGlossary();
+
+    const searchInput = document.getElementById("glossarySearch");
+    if (searchInput) {
+        searchInput.addEventListener("input", filterGlossary);
+    }
 }
 
 function renderGlossary() {
-    const container = document.getElementById("glossaryScreen");
+    const container = document.getElementById("glossaryContent");
     container.innerHTML = "";
     const grouped = {};
     glossary.forEach(term => {
@@ -57,5 +62,19 @@ function renderGlossary() {
             letterDiv.appendChild(termDiv);
         });
         container.appendChild(letterDiv);
+    });
+}
+
+function filterGlossary() {
+    const query = document.getElementById("glossarySearch").value.toLowerCase();
+    const terms = document.querySelectorAll(".glossary-term");
+    terms.forEach(term => {
+        const text = term.textContent.toLowerCase();
+        term.style.display = text.includes(query) ? "" : "none";
+    });
+    const letters = document.querySelectorAll(".glossary-letter");
+    letters.forEach(letter => {
+        const visibleTerms = Array.from(letter.querySelectorAll(".glossary-term")).some(t => t.style.display !== "none");
+        letter.style.display = visibleTerms ? "" : "none";
     });
 }

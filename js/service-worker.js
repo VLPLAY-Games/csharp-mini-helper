@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csharp-tutorial-v0.9.9';
+const CACHE_NAME = 'csharp-tutorial-v1.0.0b1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -25,7 +25,8 @@ const urlsToCache = [
   '/screenshots/0/install_6.jpg',
   '/screenshots/0/install_8.jpg',
   '/screenshots/0/properties_1.jpg',
-  '/screenshots/0/run_program_1.jpg'
+  '/screenshots/0/run_program_1.jpg',
+  '/manifest.json'
 ];
 
 self.addEventListener('install', event => {

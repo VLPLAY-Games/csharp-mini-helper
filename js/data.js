@@ -19,4 +19,8 @@ Promise.all([
     glossary = glossaryData;
     // Уведомляем остальные модули о загрузке данных
     if (window.onDataLoaded) window.onDataLoaded();
-}).catch(err => console.error('Ошибка загрузки данных:', err));
+}).catch(err => {
+    console.error('Ошибка загрузки данных:', err);
+    // Уведомляем, чтобы main.js мог показать сообщение об ошибке
+    if (window.onDataLoaded) window.onDataLoaded();
+});

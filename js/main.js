@@ -4,11 +4,13 @@ window.onDataLoaded = function() {
     renderTopicCheckboxes();
     renderPrintCheckboxes();
     updateBreadcrumbs(['Главная']);
-    attachEventHandlers(); // после загрузки данных
+    attachEventHandlers();
+    initScrollToTop();
+    initLazyLoading();
+    initKeyboardNav();
 };
 
 function attachEventHandlers() {
-    // кнопка "Пройти тест"
     document.getElementById("goToQuizBtn").addEventListener("click", function() {
         document.getElementById("mainScreen").classList.add("hidden");
         document.getElementById("quizScreen").classList.remove("hidden");
@@ -27,7 +29,6 @@ function attachEventHandlers() {
         updateBreadcrumbs(['Главная', 'Тест']);
     });
 
-    // печатная версия
     document.getElementById("printVersionBtn").addEventListener("click", function() {
         document.getElementById("printPanel").classList.remove("hidden");
     });
@@ -53,11 +54,9 @@ function attachEventHandlers() {
         document.getElementById("printPanel").classList.add("hidden");
     });
 
-    // глоссарий и граф
     document.getElementById("glossaryBtn").addEventListener("click", showGlossary);
     document.getElementById("graphBtn").addEventListener("click", showKnowledgeGraph);
 
-    // кнопки в тесте
     document.getElementById("quizSelectAllBtn").addEventListener("click", function() {
         document.querySelectorAll('#quizTopicsList input[type="checkbox"]').forEach(cb => cb.checked = true);
     });
@@ -106,7 +105,6 @@ function renderPrintCheckboxes() {
     });
 }
 
-// Обработчики, которые не зависят от данных
 document.getElementById("search").addEventListener("input", filterMenu);
 document.getElementById("toggleMenu").addEventListener("click", function(e) {
     e.stopPropagation();
@@ -142,10 +140,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("info").style.display = "none";
     initTheme();
     initLightbox();
-    // attachEventHandlers вызывается после загрузки данных
 });
 
-// Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/js/service-worker.js')
@@ -153,3 +149,73 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('Ошибка регистрации Service Worker:', err));
     });
 }
+
+// Кнопка "Наверх"
+function initScrollToTop() {
+    const btn = document.getElementById("scrollToTopBtn");
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+            btn.classList.add("show");
+        } else {
+            btn.classList.remove("show");
+        }
+    });
+    btn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+}
+
+// Ленивая загрузка изображений
+function initLazyLoading() {
+    if ('IntersectionObserver' in window) {
+        const images = document.querySelectorAll('img:not([loading="lazy"])');
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.setAttribute('loading', 'lazy');
+                    observer.unobserve(img);
+                }
+            });
+        });
+        images.forEach(img => imageObserver.observe(img));
+    } else {
+        document.querySelectorAll('img').forEach(img => img.setAttribute('loading', 'lazy'));
+    }
+}
+
+// Навигация с клавиатуры
+function initKeyboardNav() {
+    const skipLink = document.createElement('a');
+    skipLink.href = '#';
+    skipLink.className = 'skip-to-content';
+    skipLink.textContent = 'Перейти к контенту';
+    skipLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelector('.content').focus();
+    });
+    document.body.prepend(skipLink);
+    document.querySelector('.content').setAttribute('tabindex', '-1');
+}
+
+// Обработка ошибок загрузки данных
+Promise.all([
+    fetch("db/topics.json").then(r => r.json()),
+    fetch("db/quiz.json").then(r => r.json()),
+    fetch("db/glossary.json").then(r => r.json())
+]).then(([topicsData, quizDataRaw, glossaryData]) => {
+    topics = topicsData.topics;
+    quizData = quizDataRaw.questions;
+    glossary = glossaryData;
+    if (window.onDataLoaded) window.onDataLoaded();
+}).catch(err => {
+    console.error('Ошибка загрузки данных:', err);
+    const mainScreen = document.getElementById("mainScreen");
+    if (mainScreen) {
+        mainScreen.innerHTML = `<div class="error" style="padding:20px; text-align:center;">
+            <h2>Ошибка загрузки данных</h2>
+            <p>Не удалось загрузить учебные материалы. Пожалуйста, проверьте подключение к интернету и перезагрузите страницу.</p>
+            <button onclick="location.reload()">Обновить</button>
+        </div>`;
+    }
+});

@@ -1,0 +1,16 @@
+{
+  "name": "C# Краткий учебник",
+  "short_name": "C# Tutorial",
+  "description": "Интерактивный учебник по C# с теорией, примерами и тестами",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e2f",
+  "theme_color": "#4a7cff",
+  "icons": [
+    {
+      "src": "images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
