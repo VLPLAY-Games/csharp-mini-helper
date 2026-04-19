@@ -226,6 +226,152 @@
                 }
             ],
             "screens": []
+        },
+        {
+            "title": "PictureBox и Label",
+            "theory": "<p><b>PictureBox</b> — специальный элемент управления для отображения изображений. Поддерживает форматы PNG, JPG, BMP, GIF (включая анимацию).</p><p>Основное свойство — <b>Image</b>, задающее изображение. Способ отображения управляется свойством <b>SizeMode</b>:</p><ul><li><b>Normal</b> — изображение отображается в исходном размере, при необходимости появляются полосы прокрутки.</li><li><b>StretchImage</b> — растягивается на весь PictureBox, пропорции могут искажаться.</li><li><b>Zoom</b> — масштабируется с сохранением пропорций, полностью помещаясь в элемент.</li><li><b>CenterImage</b> — отображается по центру без масштабирования.</li></ul><p><b>Label</b> — элемент для вывода текста. Не предназначен для ввода, только для отображения информации. Основное свойство — <b>Text</b>. Для изменения начертания используется свойство <b>Font</b> (шрифт, размер, стиль).</p><p>Загрузить изображение в PictureBox можно двумя способами:</p><ol><li><b>Из файла</b>: <code>pictureBox1.Image = Image.FromFile(@\"путь\");</code> (требуется using System.Drawing;).</li><li><b>Из ресурсов проекта</b>: предварительно добавить изображение в ресурсы (свойства проекта → Ресурсы), затем <code>pictureBox1.Image = Properties.Resources.имя_изображения;</code>.</li></ol>",
+            "important": "Для использования <code>Image.FromFile</code> необходимо подключить пространство имён <code>System.Drawing</code>. Ресурсный способ надёжнее — изображение встраивается в .exe файл.",
+            "tip": "Для отображения анимированных GIF используйте PictureBox — анимация будет работать автоматически. Чтобы текст в Label был многострочным, установите <code>AutoSize = false</code> и задайте нужную высоту.",
+            "error": "Частая ошибка — забыть про экранирование обратных слешей в пути: используйте <code>@\"C:\\image.jpg\"</code> или двойные слеши. При загрузке из файла убедитесь, что файл существует, иначе возникнет исключение.",
+            "prerequisites": [0,2],
+            "examples": [
+                {
+                    "name": "Загрузка изображения в PictureBox из файла",
+                    "code": "using System.Drawing;\n\nprivate void buttonLoad_Click(object sender, EventArgs e)\n{\n    pictureBox1.Image = Image.FromFile(@\"D:\\MyImages\\cat.jpg\");\n    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;\n}"
+                },
+                {
+                    "name": "Загрузка изображения из ресурсов",
+                    "code": "using MyProject.Properties;\n\nprivate void buttonResource_Click(object sender, EventArgs e)\n{\n    pictureBox1.Image = Resources.my_picture;\n}"
+                },
+                {
+                    "name": "Изменение текста в Label и шрифта",
+                    "code": "label1.Text = \"Привет, мир!\";\nlabel1.Font = new Font(\"Arial\", 14, FontStyle.Bold);"
+                }
+            ],
+            "screens": []
+        },
+        {
+            "title": "Глобальные переменные и таймеры",
+            "theory": "<p><b>Глобальные переменные</b> (в контексте Windows Forms) — это поля класса формы, объявленные на уровне класса, а не внутри метода. Они доступны из любого метода этой формы и сохраняют своё значение между вызовами методов.</p><p>Пример объявления:</p><pre>public partial class FormMain : Form {\n    int justNum = 5;\n    bool hasGlass = false;\n    string name = \"Maria\";\n    // ...\n}</pre><p><b>Timer</b> — компонент, позволяющий выполнять код периодически. Основные шаги работы с таймером:</p><ol><li>Объявить переменную типа <code>Timer</code> на уровне класса.</li><li>В любом методе (например, в конструкторе) создать экземпляр: <code>timer = new Timer();</code></li><li>Задать интервал в миллисекундах: <code>timer.Interval = 500;</code> (0,5 секунды).</li><li>Подписаться на событие <code>Tick</code>: <code>timer.Tick += ИмяМетода;</code> (метод должен иметь сигнатуру <code>void(object sender, EventArgs e)</code>).</li><li>Запустить таймер: <code>timer.Start();</code> (или <code>timer.Enabled = true;</code>).</li><li>Остановить: <code>timer.Stop();</code> (или <code>timer.Enabled = false;</code>).</li></ol><p>Код внутри обработчика Tick будет вызываться многократно через каждый интервал, пока таймер не остановят.</p>",
+            "important": "Таймер продолжает работать, пока не будет остановлен. Не забывайте останавливать таймер, когда он больше не нужен, чтобы избежать лишней нагрузки. Для запуска таймера сразу при старте программы поместите код инициализации и запуска в конструктор после <code>InitializeComponent()</code>.",
+            "tip": "Используйте глобальные переменные для хранения состояния приложения (например, счётчик нажатий, выбранный персонаж и т.д.). Для таймера всегда задавайте интервал перед запуском. Если нужно выполнить действие только один раз с задержкой, можно запустить таймер и сразу остановить его в обработчике Tick.",
+            "error": "Распространённая ошибка — создать таймер внутри метода, а не на уровне класса. В этом случае он будет удалён после выхода из метода, и событие Tick не сработает. Также не забывайте подписывать обработчик через +=, иначе метод не вызовется.",
+            "prerequisites": [0,2],
+            "examples": [
+                {
+                    "name": "Объявление глобальных переменных",
+                    "code": "public partial class FormMain : Form\n{\n    int score = 0;\n    bool isGameActive = true;\n    string playerName = \"Player\";\n\n    public FormMain()\n    {\n        InitializeComponent();\n    }\n}"
+                },
+                {
+                    "name": "Использование глобальной переменной в двух методах",
+                    "code": "private void buttonIncrement_Click(object sender, EventArgs e)\n{\n    score++;\n    labelScore.Text = score.ToString();\n}\n\nprivate void buttonReset_Click(object sender, EventArgs e)\n{\n    score = 0;\n    labelScore.Text = score.ToString();\n}"
+                },
+                {
+                    "name": "Создание и запуск таймера при старте формы",
+                    "code": "Timer timer;\nint counter = 0;\n\npublic FormMain()\n{\n    InitializeComponent();\n    timer = new Timer();\n    timer.Interval = 1000; // 1 секунда\n    timer.Tick += Timer_Tick;\n    timer.Start();\n}\n\nprivate void Timer_Tick(object sender, EventArgs e)\n{\n    counter++;\n    labelTimer.Text = $\"Прошло секунд: {counter}\";\n    if (counter >= 10)\n    {\n        timer.Stop();\n        MessageBox.Show(\"10 секунд прошло!\");\n    }\n}"
+                }
+            ],
+            "screens": []
+        },
+        {
+            "title": "Клавиатурные события",
+            "theory": "<p>Windows Forms позволяет обрабатывать нажатия клавиш на форме и элементах управления. Основные события клавиатуры:</p><ul><li><b>KeyDown</b> — возникает в момент нажатия клавиши.</li><li><b>KeyUp</b> — возникает в момент отпускания клавиши.</li></ul><p>Чтобы форма реагировала на клавиши, необходимо привязать обработчик к событию формы (например, <code>Form1_KeyDown</code>). Также полезно установить свойство формы <code>KeyPreview = true</code>, чтобы форма получала события клавиатуры до того, как они будут переданы элементу управления, находящемуся в фокусе.</p><p>В обработчик передаётся объект <b>KeyEventArgs</b>, содержащий информацию о нажатой клавише и модификаторах:</p><ul><li><code>e.KeyCode</code> — код нажатой клавиши (сравнивается с перечислением <code>Keys</code>).</li><li><code>e.Shift</code>, <code>e.Control</code>, <code>e.Alt</code> — были ли зажаты соответствующие модификаторы.</li><li><code>e.KeyData</code> — комбинация клавиши и модификаторов (удобно для отладки).</li></ul>",
+            "important": "Для перехвата клавиш на уровне всей формы установите <code>this.KeyPreview = true;</code> в конструкторе или дизайнере. Не забудьте также подписать форму на событие KeyDown/KeyUp (через дизайнер или код).",
+            "tip": "Проверяйте модификаторы через отдельные свойства (<code>e.Shift</code>), а не через <code>e.KeyCode == Keys.Shift</code>. Для проверки комбинаций можно использовать вложенные условия или логические операторы (<code>if (e.Control && e.KeyCode == Keys.S)</code>).",
+            "error": "Частая ошибка — не установить <code>KeyPreview = true</code>, из-за чего форма не получает события, если фокус находится на другом элементе (например, TextBox). Также не забывайте, что некоторые клавиши (например, стрелки) обрабатываются по умолчанию элементами управления — для их перехвата может потребоваться дополнительная настройка.",
+            "prerequisites": [0,2],
+            "examples": [
+                {
+                    "name": "Подписка на событие KeyDown формы (в конструкторе)",
+                    "code": "public FormMain()\n{\n    InitializeComponent();\n    this.KeyPreview = true;\n    this.KeyDown += FormMain_KeyDown;\n}\n\nprivate void FormMain_KeyDown(object sender, KeyEventArgs e)\n{\n    labelInfo.Text = $\"Нажата клавиша: {e.KeyCode}\";\n}"
+                },
+                {
+                    "name": "Проверка конкретной клавиши (без модификаторов)",
+                    "code": "private void FormMain_KeyDown(object sender, KeyEventArgs e)\n{\n    if (e.KeyCode == Keys.D)\n    {\n        MessageBox.Show(\"Вы нажали D!\");\n    }\n}"
+                },
+                {
+                    "name": "Проверка комбинаций с модификаторами",
+                    "code": "private void FormMain_KeyDown(object sender, KeyEventArgs e)\n{\n    if (e.Shift && e.KeyCode == Keys.D)\n        labelMain.Text = \"Вы нажали Shift + D\";\n    else if (e.Control && e.KeyCode == Keys.D)\n        labelMain.Text = \"Вы нажали Ctrl + D\";\n    else if (e.Alt && e.KeyCode == Keys.D)\n        labelMain.Text = \"Вы нажали Alt + D\";\n    else if (e.Shift && e.Control && e.KeyCode == Keys.F)\n        labelMain.Text = \"Вы нажали Shift + Ctrl + F\";\n}"
+                }
+            ],
+            "screens": []
+        },
+        {
+            "title": "Создание объектов из кода",
+            "theory": "<p>В Windows Forms можно динамически создавать элементы управления прямо во время выполнения программы, а не только через дизайнер. Это полезно, когда количество или тип элементов заранее неизвестны.</p><p><b>Основные шаги создания объекта (например, кнопки):</b></p><ol><li>Создать экземпляр класса: <code>Button button = new Button();</code></li><li>Настроить свойства: <code>button.Text = \"Нажми меня\"; button.Size = new Size(100, 30); button.Location = new Point(10, 10);</code></li><li>Подписать обработчик события (если нужно): <code>button.Click += Button_Click;</code></li><li>Добавить объект на форму: <code>this.Controls.Add(button);</code></li></ol><p><b>Хранение созданных объектов:</b> Чтобы иметь доступ к созданным объектам позже, их следует сохранять в списке (<code>List&lt;Button&gt;</code>), объявленном на уровне класса. Это позволяет перебирать, изменять или удалять объекты.</p><p><b>Получение существующих объектов с формы:</b> Коллекция <code>this.Controls</code> содержит все элементы управления. Можно перебрать её и отфильтровать по типу: <code>if (this.Controls[i].GetType() == typeof(Label))</code>.</p>",
+            "important": "Все динамически созданные объекты нужно добавлять в <code>Controls</code>, иначе они не отобразятся. Для хранения используйте <code>List&lt;T&gt;</code>, объявленный как поле класса, иначе объекты будут потеряны после выхода из метода.",
+            "tip": "Для удобной фильтрации элементов используйте LINQ: <code>var buttons = this.Controls.OfType<Button>().ToList();</code> (требуется using System.Linq;). Не забывайте подписывать события, иначе объекты не будут реагировать на действия пользователя.",
+            "error": "Частая ошибка — создание объекта внутри метода и несохранение ссылки на него. Если нужно изменять его свойства позже, обязательно сохраните в поле класса или в список. Также забывают привести тип при извлечении из Controls: <code>Label lbl = (Label)this.Controls[i];</code>",
+            "prerequisites": [0,2],
+            "examples": [
+                {
+                    "name": "Создание кнопки программно",
+                    "code": "private void buttonCreate_Click(object sender, EventArgs e)\n{\n    Button newButton = new Button();\n    newButton.Text = \"Динамическая кнопка\";\n    newButton.Size = new Size(120, 30);\n    newButton.Location = new Point(50, 50);\n    newButton.Click += DynamicButton_Click;\n    this.Controls.Add(newButton);\n}\n\nprivate void DynamicButton_Click(object sender, EventArgs e)\n{\n    MessageBox.Show(\"Вы нажали динамическую кнопку!\");\n}"
+                },
+                {
+                    "name": "Хранение кнопок в списке",
+                    "code": "List<Button> buttons = new List<Button>();\n\nprivate void buttonAdd_Click(object sender, EventArgs e)\n{\n    Button btn = new Button();\n    btn.Text = $\"Кнопка {buttons.Count + 1}\";\n    btn.Location = new Point(10, 10 + buttons.Count * 40);\n    btn.Click += (s, ev) => MessageBox.Show(btn.Text);\n    this.Controls.Add(btn);\n    buttons.Add(btn);\n}\n\nprivate void buttonChangeAll_Click(object sender, EventArgs e)\n{\n    foreach (Button b in buttons)\n        b.BackColor = Color.LightBlue;\n}"
+                },
+                {
+                    "name": "Получение всех Label с формы",
+                    "code": "private void buttonGetLabels_Click(object sender, EventArgs e)\n{\n    List<Label> labels = new List<Label>();\n    foreach (Control c in this.Controls)\n    {\n        if (c is Label)\n            labels.Add((Label)c);\n    }\n    MessageBox.Show($\"Найдено меток: {labels.Count}\");\n}"
+                }
+            ],
+            "screens": []
+        },
+        {
+            "title": "Рисование графики в реальном времени",
+            "theory": "<p>В Windows Forms можно рисовать графические примитивы (линии, прямоугольники, окружности, дуги, многоугольники и т.д.) непосредственно на элементе управления, чаще всего на <b>PictureBox</b>.</p><p><b>Два основных подхода к рисованию:</b></p><ol><li><b>Рисование через событие Paint</b> — используется для статического рисунка, который должен сохраняться при перерисовке (например, после сворачивания/разворачивания окна). Код помещается в обработчик <code>PictureBox_Paint</code>, где доступен объект <code>e.Graphics</code>.</li><li><b>Рисование по запросу (в реальном времени)</b> — например, по клику мыши или движению курсора. Используется метод <code>CreateGraphics()</code> элемента, который возвращает объект Graphics. Однако рисунок, нанесённый таким способом, <b>не сохраняется</b> при перерисовке.</li></ol><p><b>Инструменты рисования:</b></p><ul><li><b>Pen</b> — для рисования контуров (DrawRectangle, DrawLine, DrawEllipse и т.д.). Создаётся с указанием цвета: <code>Pen myPen = new Pen(Color.Red);</code></li><li><b>Brush</b> — для заливки (FillRectangle, FillEllipse и т.д.). Можно получить из кисти: <code>myPen.Brush</code> или создать отдельно, например <code>SolidBrush brush = new SolidBrush(Color.Blue);</code></li></ul><p><b>Основные методы рисования:</b></p><ul><li><code>DrawRectangle(pen, x, y, width, height)</code></li><li><code>DrawLine(pen, x1, y1, x2, y2)</code></li><li><code>DrawEllipse(pen, x, y, width, height)</code></li><li><code>DrawPolygon(pen, Point[] points)</code> — многоугольник по массиву точек</li><li><code>FillPolygon(brush, Point[] points)</code> — закрашенный многоугольник</li><li><code>DrawArc(pen, x, y, width, height, startAngle, sweepAngle)</code> — дуга</li><li><code>DrawPie(pen, x, y, width, height, startAngle, sweepAngle)</code> — сектор (“пирог”)</li></ul>",
+            "important": "Рисование в <code>Paint</code> сохраняется при перерисовках, а через <code>CreateGraphics()</code> — нет. Для рисования мышью используйте события <code>MouseMove</code> и <code>MouseClick</code> с <code>CreateGraphics()</code>. Чтобы рисование мышью было постоянным, нужно сохранять все точки в список и перерисовывать их в <code>Paint</code>.",
+            "tip": "Для рисования по центру курсора вычитайте половину размера фигуры: <code>e.Location.X - 5, e.Location.Y - 5</code>. Чтобы получить случайные цвета, используйте <code>Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256))</code>.",
+            "error": "Распространённая ошибка — пытаться рисовать на форме или элементе, который ещё не создан или невидим. Также забывают, что <code>CreateGraphics()</code> не сохраняет рисунок: после перерисовки (например, при перекрытии окна) всё исчезнет. Для сохранения используйте <code>Bitmap</code> и <code>Graphics.FromImage()</code>.",
+            "prerequisites": [0,2,7],
+            "examples": [
+                {
+                    "name": "Рисование прямоугольника в Paint (при загрузке формы)",
+                    "code": "private void pictureBox1_Paint(object sender, PaintEventArgs e)\n{\n    Pen penRed = new Pen(Color.Red, 2);\n    e.Graphics.DrawRectangle(penRed, 10, 10, 100, 50);\n}"
+                },
+                {
+                    "name": "Закрашенный эллипс и сектор",
+                    "code": "private void pictureBox1_Paint(object sender, PaintEventArgs e)\n{\n    Pen penBlue = new Pen(Color.Blue);\n    e.Graphics.FillEllipse(penBlue.Brush, 20, 20, 80, 80);\n    e.Graphics.FillPie(penBlue.Brush, 120, 20, 80, 80, 0, 90);\n}"
+                },
+                {
+                    "name": "Рисование по клику мыши (кружок под курсором)",
+                    "code": "Pen penBlack = new Pen(Color.Black, 3);\n\nprivate void pictureBox1_MouseClick(object sender, MouseEventArgs e)\n{\n    Graphics g = pictureBox1.CreateGraphics();\n    g.DrawEllipse(penBlack, e.X - 5, e.Y - 5, 10, 10);\n}"
+                },
+                {
+                    "name": "Рисование мышью (при движении с зажатой кнопкой)",
+                    "code": "bool drawing = false;\nPoint prevPoint;\n\nprivate void pictureBox1_MouseDown(object sender, MouseEventArgs e)\n{\n    drawing = true;\n    prevPoint = e.Location;\n}\n\nprivate void pictureBox1_MouseMove(object sender, MouseEventArgs e)\n{\n    if (drawing)\n    {\n        Graphics g = pictureBox1.CreateGraphics();\n        g.DrawLine(new Pen(Color.Black, 2), prevPoint, e.Location);\n        prevPoint = e.Location;\n    }\n}\n\nprivate void pictureBox1_MouseUp(object sender, MouseEventArgs e)\n{\n    drawing = false;\n}"
+                },
+                {
+                    "name": "Многоугольник из массива точек",
+                    "code": "Point[] points = new Point[]\n{\n    new Point(50, 10),\n    new Point(90, 50),\n    new Point(70, 90),\n    new Point(30, 90),\n    new Point(10, 50)\n};\n\nprivate void pictureBox1_Paint(object sender, PaintEventArgs e)\n{\n    Pen penGreen = new Pen(Color.Green, 2);\n    e.Graphics.DrawPolygon(penGreen, points);\n    e.Graphics.FillPolygon(penGreen.Brush, points); // закрашенный\n}"
+                }
+            ],
+            "screens": []
+        },
+        {
+            "title": "Многооконные приложения",
+            "theory": "<p>Многие приложения требуют использования нескольких окон (форм). В Windows Forms можно легко добавлять новые формы и управлять ими из кода.</p><p><b>Добавление новой формы в проект:</b></p><ol><li>В меню: <b>Проект → Добавить форму</b> (или правой кнопкой по проекту → Добавить → Форма Windows Forms).</li><li>Задать имя новой форме (например, <code>AboutForm</code>).</li><li>Visual Studio автоматически создаст файл <code>AboutForm.cs</code> и откроет дизайнер новой формы.</li></ol><p><b>Открытие формы из кода основной формы:</b></p><ul><li><b>Неблокирующее открытие</b> (можно переключаться между окнами):<br><code>AboutForm myForm = new AboutForm();</code><br><code>myForm.Show();</code></li><li><b>Блокирующее открытие</b> (пока дочерняя форма не закроется, родительская недоступна):<br><code>AboutForm myForm = new AboutForm();</code><br><code>myForm.ShowDialog();</code></li></ul><p><b>Настройка формы перед открытием:</b> Можно изменить любые свойства (заголовок, размеры, цвет фона и т.д.) до вызова <code>Show()</code> или <code>ShowDialog()</code>:</p><pre>AboutForm myForm = new AboutForm();\nmyForm.Text = \"О программе\";\nmyForm.Width = 400;\nmyForm.Height = 300;\nmyForm.BackColor = Color.LightGray;\nmyForm.Show();</pre><p><b>Закрытие форм:</b> Родительская форма (главное окно) при закрытии обычно закрывает все дочерние. Если нужно выполнить код при закрытии дочерней формы, можно подписаться на событие <code>FormClosing</code>.</p>",
+            "important": "После вызова <code>ShowDialog()</code> код, следующий за ним, выполнится только после закрытия дочерней формы. При использовании <code>Show()</code> код продолжает выполняться сразу. Если нужно передать данные между формами, используйте публичные свойства или конструктор с параметрами.",
+            "tip": "Для диалоговых окон (например, окно настроек, 'О программе') чаще используют <code>ShowDialog()</code>. Чтобы закрыть текущую форму изнутри, вызовите <code>this.Close()</code>. Не забудьте задать свойство <code>StartPosition</code> новой формы (например, CenterParent), чтобы она открывалась по центру родительской.",
+            "error": "Частая ошибка — создавать форму внутри обработчика события, но не вызывать <code>Show()</code> или <code>ShowDialog()</code>. Также забывают указать имя формы при создании: <code>NewForm myForm = new NewForm();</code> — <code>NewForm</code> должно соответствовать реальному имени класса формы.",
+            "prerequisites": [0,2],
+            "examples": [
+                {
+                    "name": "Добавление новой формы и открытие её по кнопке",
+                    "code": "// Предположим, в проекте добавлена форма ChildForm\n\nprivate void buttonOpen_Click(object sender, EventArgs e)\n{\n    ChildForm child = new ChildForm();\n    child.Text = \"Дочернее окно\";\n    child.Width = 500;\n    child.Height = 300;\n    child.Show(); // не блокирует\n}"
+                },
+                {
+                    "name": "Модальное открытие (диалог)",
+                    "code": "private void buttonShowDialog_Click(object sender, EventArgs e)\n{\n    DialogForm dlg = new DialogForm();\n    dlg.StartPosition = FormStartPosition.CenterParent;\n    DialogResult result = dlg.ShowDialog(); // блокирует\n    if (result == DialogResult.OK)\n        MessageBox.Show(\"Пользователь нажал ОК\");\n}"
+                },
+                {
+                    "name": "Настройка формы перед открытием",
+                    "code": "private void buttonOpenSettings_Click(object sender, EventArgs e)\n{\n    SettingsForm settings = new SettingsForm();\n    settings.Text = \"Настройки\";\n    settings.BackColor = Color.White;\n    settings.Size = new Size(600, 400);\n    settings.Show();\n}"
+                }
+            ],
+            "screens": []
         }
     ]
 }

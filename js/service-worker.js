@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csharp-tutorial-v1.0.0b1';
+const CACHE_NAME = 'csharp-tutorial-v1.0.0b2';
 const urlsToCache = [
   '/',
   '/index.html',
